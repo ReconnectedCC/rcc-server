@@ -69,7 +69,7 @@ public class Ctserver implements ModInitializer {
 			//LOGGER.info(String.valueOf(timeBetween));
 			//LOGGER.info(String.valueOf(mspt));
 			//LOGGER.info(String.valueOf(tps));
-            if (tps < 20) {
+            if (tps <= 20) {
 				CompletableFuture.runAsync(() -> {
 					try {
 						sendPostRequest("http://us-ky-medium-0004.knijn.one:58926/tps", String.valueOf(tps));
