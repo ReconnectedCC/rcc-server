@@ -63,7 +63,7 @@ public class Ctserver implements ModInitializer {
 
 		if (tickCounter >= 20) {
 			int playerCount = minecraftServer.getCurrentPlayerCount();
-			LOGGER.info(String.valueOf(playerCount));
+			//LOGGER.info(String.valueOf(playerCount));
 			double afterTicks = Instant.now().toEpochMilli();
 			double timeBetween = afterTicks - zeroTicks;
 			double mspt = (timeBetween / 20) ;
