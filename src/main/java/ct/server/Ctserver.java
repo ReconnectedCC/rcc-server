@@ -69,13 +69,15 @@ public class Ctserver implements ModInitializer {
 			//LOGGER.info(String.valueOf(timeBetween));
 			//LOGGER.info(String.valueOf(mspt));
 			//LOGGER.info(String.valueOf(tps));
-            CompletableFuture.runAsync(() -> {
-				try {
-					sendPostRequest("http://us-ky-medium-0004.knijn.one:58926/tps", String.valueOf(tps));
-				} catch (Exception e) {
-					LOGGER.error("Failed to send POST request", e);
-				}
-			});
+            if (tps < 20) {
+				CompletableFuture.runAsync(() -> {
+					try {
+						sendPostRequest("http://us-ky-medium-0004.knijn.one:58926/tps", String.valueOf(tps));
+					} catch (Exception e) {
+						LOGGER.error("Failed to send POST request", e);
+					}
+				});
+			}
 			//LOGGER.info("Sent HTTP request");
 			tickCounter = 0;
 			zeroTicks = Instant.now().toEpochMilli();
