@@ -38,17 +38,18 @@ public class Ctserver implements ModInitializer {
             }
         });
 	}
-	private void sendPostRequest(String urlString, String plaintext) throws Exception {
+	private void sendPostRequest(String urlString, String tps, String playerCount) throws Exception {
 		URL url = new URL(urlString);
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("POST");
 		con.setRequestProperty("Content-Type", "text/plain; utf-8");
-		con.setRequestProperty("TPS", plaintext);
+		con.setRequestProperty("TPS", tps);
+		con.setRequestProperty("PLAYERCOUNT", playerCount);
 		con.setRequestProperty("Accept", "text/plain");
 		con.setDoOutput(true);
 
 		try (OutputStream os = con.getOutputStream()) {
-			byte[] input = plaintext.getBytes(StandardCharsets.UTF_8);
+			byte[] input = tps.getBytes(StandardCharsets.UTF_8);
 			os.write(input, 0, input.length);
 		}
 
@@ -61,7 +62,8 @@ public class Ctserver implements ModInitializer {
 		tickCounter++;
 
 		if (tickCounter >= 20) {
-
+			int playerCount = minecraftServer.getCurrentPlayerCount();
+			LOGGER.info(String.valueOf(playerCount));
 			double afterTicks = Instant.now().toEpochMilli();
 			double timeBetween = afterTicks - zeroTicks;
 			double mspt = (timeBetween / 20) ;
@@ -72,7 +74,7 @@ public class Ctserver implements ModInitializer {
             if (tps <= 20) {
 				CompletableFuture.runAsync(() -> {
 					try {
-						sendPostRequest("http://us-ky-medium-0004.knijn.one:58926/tps", String.valueOf(tps));
+						sendPostRequest("http://us-ky-medium-0004.knijn.one:58926/tps", String.valueOf(tps),String.valueOf(playerCount));
 					} catch (Exception e) {
 						LOGGER.error("Failed to send POST request", e);
 					}
