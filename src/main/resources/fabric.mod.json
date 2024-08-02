@@ -16,7 +16,7 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"ct.server.Ctserver"
+          "ct.server.CtServer"
 		],
 		"client": [
 			"ct.server.CtserverClient"
