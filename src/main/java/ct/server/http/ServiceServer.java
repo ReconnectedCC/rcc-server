@@ -1,23 +1,27 @@
-package ct.server;
+package ct.server.http;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import ct.server.CtServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-public class ServiceHttpServer {
-    private HttpServer server;
+public class ServiceServer {
+    private final HttpServer server;
+    public HttpServer httpServer() {
+        return this.server;
+    }
 
-    public ServiceHttpServer() throws IOException {
+    public ServiceServer() throws IOException {
         server = HttpServer.create(new InetSocketAddress(CtServer.CONFIG.httpPort()), 0);
         server.createContext("/tps", new TPSHandler());
         server.createContext("/mspt", new MSPTHandler());
         server.createContext("/player", new PlayerCountHandler());
         server.setExecutor(null);
 
-        var httpThread = new Thread(() -> server.start());
+        var httpThread = new Thread(server::start);
         httpThread.start();
     }
 

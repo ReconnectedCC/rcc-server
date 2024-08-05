@@ -1,23 +1,18 @@
 package ct.server;
 
+import ct.server.database.DatabaseClient;
+import ct.server.http.ServiceServer;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
-import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.concurrent.CompletableFuture;
+import java.sql.SQLException;
 
 
 public class CtServer implements ModInitializer {
@@ -30,17 +25,38 @@ public class CtServer implements ModInitializer {
     private static float currentMspt = 0;
     private static int currentPlayerCount = 0;
 
-    private static CtServer INSTANCE;
-
     public static CtServer getInstance() {
         return INSTANCE;
+    }
+    private static CtServer INSTANCE;
+
+    private ServiceServer serviceServer;
+    public ServiceServer serviceServer() {
+        return serviceServer;
+    }
+
+    private DatabaseClient database;
+    public DatabaseClient database() {
+        return database;
     }
 
     @Override
     public void onInitialize() {
         INSTANCE = this;
 
-        LOGGER.info("Starting ct-client");
+        LOGGER.info("Starting ct-server");
+
+        try {
+            database = new DatabaseClient();
+        } catch(SQLException e) {
+            LOGGER.error("Could not connect to the database", e);
+        }
+
+        try {
+            serviceServer = new ServiceServer();
+        } catch (IOException e) {
+            LOGGER.error("Unable to start HTTP server", e);
+        }
 
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             currentMspt = server.getAverageTickTime();
@@ -58,12 +74,6 @@ public class CtServer implements ModInitializer {
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             currentPlayerCount = server.getCurrentPlayerCount() - 1;
         });
-
-        try {
-            var httpServer = new ServiceHttpServer();
-        } catch (IOException e) {
-            LOGGER.error("Unable to start HTTP server", e);
-        }
     }
 
     public static float getTPS() {
