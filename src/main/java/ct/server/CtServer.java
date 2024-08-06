@@ -3,6 +3,7 @@ package ct.server;
 import ct.server.database.DatabaseClient;
 import ct.server.database.PlayerData;
 import ct.server.database.PlayerTable;
+import ct.server.events.PlayerWelcome;
 import ct.server.http.ServiceServer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
@@ -51,7 +52,7 @@ public class CtServer implements ModInitializer {
         return database;
     }
 
-    private PlayerTable playerTable;
+    private final PlayerTable playerTable = new PlayerTable();
 
     public PlayerTable playerTable() {
         return playerTable;
@@ -65,7 +66,6 @@ public class CtServer implements ModInitializer {
 
         try {
             database = new DatabaseClient();
-            playerTable = new PlayerTable();
 
             playerTable.ensureDatabaseCreated();
         } catch (SQLException e) {
@@ -95,6 +95,9 @@ public class CtServer implements ModInitializer {
                 playerData.firstJoinedDate(new Date());
                 playerData.name(player.getName().getString());
                 playerTable.updatePlayerData(playerData);
+
+                PlayerWelcome.PLAYER_WELCOME.invoker().playerWelcome(player, playerData, server);
+
                 broadcastMessage(server, Text.literal("Welcome " + player.getName().getString() + " to the server!").formatted(Formatting.GREEN));
             } else {
                 if (!playerData.name().equals(player.getName().getString())) {
@@ -105,7 +108,6 @@ public class CtServer implements ModInitializer {
         });
 
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-
             currentPlayerCount = server.getCurrentPlayerCount() - 1;
         });
     }
