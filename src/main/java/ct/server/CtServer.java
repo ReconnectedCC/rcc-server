@@ -1,18 +1,26 @@
 package ct.server;
 
 import ct.server.database.DatabaseClient;
+import ct.server.database.PlayerData;
+import ct.server.database.PlayerTable;
 import ct.server.http.ServiceServer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
+import net.minecraft.text.Texts;
+import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Date;
 
 
 public class CtServer implements ModInitializer {
@@ -28,16 +36,25 @@ public class CtServer implements ModInitializer {
     public static CtServer getInstance() {
         return INSTANCE;
     }
+
     private static CtServer INSTANCE;
 
     private ServiceServer serviceServer;
+
     public ServiceServer serviceServer() {
         return serviceServer;
     }
 
     private DatabaseClient database;
+
     public DatabaseClient database() {
         return database;
+    }
+
+    private PlayerTable playerTable;
+
+    public PlayerTable playerTable() {
+        return playerTable;
     }
 
     @Override
@@ -48,8 +65,11 @@ public class CtServer implements ModInitializer {
 
         try {
             database = new DatabaseClient();
-        } catch(SQLException e) {
-            LOGGER.error("Could not connect to the database", e);
+            playerTable = new PlayerTable();
+
+            playerTable.ensureDatabaseCreated();
+        } catch (SQLException e) {
+            LOGGER.error("Database error", e);
         }
 
         try {
@@ -65,15 +85,35 @@ public class CtServer implements ModInitializer {
             }
         });
 
-        ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
-            if(entity instanceof ServerPlayerEntity) {
-                currentPlayerCount = world.getServer().getCurrentPlayerCount();
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            currentPlayerCount = server.getCurrentPlayerCount() + 1;
+            var player = handler.getPlayer();
+            var playerData = playerTable.getPlayerData(player.getUuid());
+            if(playerData == null) {
+                // new player!
+                playerData = new PlayerData(handler.getPlayer().getUuid());
+                playerData.firstJoinedDate(new Date());
+                playerData.name(player.getName().getString());
+                playerTable.updatePlayerData(playerData);
+                broadcastMessage(server, Text.literal("Welcome " + player.getName().getString() + " to the server!").formatted(Formatting.GREEN));
+            } else {
+                if (!playerData.name().equals(player.getName().getString())) {
+                    playerData.name(player.getName().getString());
+                    playerTable.updatePlayerData(playerData);
+                }
             }
         });
 
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+
             currentPlayerCount = server.getCurrentPlayerCount() - 1;
         });
+    }
+
+    public void broadcastMessage(MinecraftServer server, Text message) {
+        for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            player.sendMessage(message, false);
+        }
     }
 
     public static float getTPS() {
