@@ -3,13 +3,13 @@
 	"id": "ct-server",
 	"version": "${version}",
 	"name": "ct-server",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Server mod for the project CT Minecraft server",
 	"authors": [
-		"Me!"
+		"AlexDevs",
+		"EmmaKnijn"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/project-connecticut/ct-server"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/ct-server/icon.png",
