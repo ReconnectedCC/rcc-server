@@ -10,12 +10,15 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class PlayerTable {
-    private final DatabaseClient database = CtServer.getInstance().database();
     private final HashMap<UUID, PlayerData> cache = new HashMap<>();
+
+    private DatabaseClient database() {
+        return CtServer.getInstance().database();
+    }
 
     public void ensureDatabaseCreated() {
         try {
-            var conn = database.connection();
+            var conn = database().connection();
 
             var stmt = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS players (" +
@@ -46,7 +49,7 @@ public class PlayerTable {
         }
 
         try {
-            var conn = database.connection();
+            var conn = database().connection();
 
             var stmt = conn.prepareStatement("SELECT * FROM players WHERE uuid = ?;");
             stmt.setObject(1, uuid);
@@ -75,7 +78,7 @@ public class PlayerTable {
 
     public boolean deletePlayerData(UUID uuid) {
         try {
-            var conn = database.connection();
+            var conn = database().connection();
 
             var stmt = conn.prepareStatement("DELETE FROM players WHERE uuid = ?;");
             stmt.setObject(1, uuid);
@@ -93,7 +96,7 @@ public class PlayerTable {
     public boolean updatePlayerData(PlayerData playerData) {
         deletePlayerData(playerData.uuid());
         try {
-            var conn = database.connection();
+            var conn = database().connection();
 
             var stmt = conn.prepareStatement("INSERT INTO players(uuid, firstJoined, lastKnownName, discordId, isBot, isAlt) VALUES (?,?,?,?,?,?);");
             stmt.setObject(1, playerData.uuid());
