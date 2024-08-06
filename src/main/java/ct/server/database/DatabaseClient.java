@@ -12,10 +12,4 @@ public class DatabaseClient {
         }
         return connection;
     }
-
-    // Prepare a connection to the DB ready for use
-    // TODO: Consider creating a pool
-    public DatabaseClient() throws SQLException {
-        connection();
-    }
 }

@@ -6,15 +6,12 @@ import ct.server.database.PlayerTable;
 import ct.server.events.PlayerWelcome;
 import ct.server.http.ServiceServer;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
-import net.minecraft.text.Texts;
 import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,39 +31,38 @@ public class CtServer implements ModInitializer {
     private static float currentMspt = 0;
     private static int currentPlayerCount = 0;
 
+    private static CtServer INSTANCE;
     public static CtServer getInstance() {
         return INSTANCE;
     }
 
-    private static CtServer INSTANCE;
-
     private ServiceServer serviceServer;
-
     public ServiceServer serviceServer() {
         return serviceServer;
     }
 
-    private DatabaseClient database;
-
+    private final DatabaseClient database = new DatabaseClient();
     public DatabaseClient database() {
         return database;
     }
 
     private final PlayerTable playerTable = new PlayerTable();
-
     public PlayerTable playerTable() {
         return playerTable;
     }
 
+    public CtServer() {
+        INSTANCE = this;
+    }
+
     @Override
     public void onInitialize() {
-        INSTANCE = this;
 
         LOGGER.info("Starting ct-server");
 
         try {
-            database = new DatabaseClient();
-
+            // Jumpstart connection
+            database.connection();
             playerTable.ensureDatabaseCreated();
         } catch (SQLException e) {
             LOGGER.error("Database error", e);
