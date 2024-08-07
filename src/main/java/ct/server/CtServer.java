@@ -95,6 +95,7 @@ public class CtServer implements ModInitializer {
 
                 PlayerWelcome.PLAYER_WELCOME.invoker().playerWelcome(player, playerData, server);
 
+                // TODO: make it customizable via config
                 broadcastMessage(server, Text.literal("Welcome " + player.getName().getString() + " to the server!").formatted(Formatting.GREEN));
             } else {
                 if (!playerData.name().equals(player.getName().getString())) {

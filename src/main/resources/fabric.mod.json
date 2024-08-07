@@ -11,7 +11,7 @@
 	"contact": {
 		"sources": "https://github.com/project-connecticut/ct-server"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT License",
 	"icon": "assets/ct-server/icon.png",
 	"environment": "*",
 	"entrypoints": {
@@ -34,8 +34,5 @@
 		"minecraft": "~1.21",
 		"java": ">=21",
 		"fabric-api": "*"
-	},
-	"suggests": {
-		"another-mod": "*"
 	}
 }
