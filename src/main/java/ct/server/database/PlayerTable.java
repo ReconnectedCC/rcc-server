@@ -27,7 +27,8 @@ public class PlayerTable {
                             "lastKnownName VARCHAR(16)," +
                             "discordId VARCHAR," +
                             "isBot BOOL DEFAULT FALSE," +
-                            "isAlt BOOL DEFAULT FALSE" +
+                            "isAlt BOOL DEFAULT FALSE," +
+                            "pronouns VARCHAR DEFAULT NULL" +
                             ");");
 
             stmt.executeUpdate();
@@ -65,6 +66,7 @@ public class PlayerTable {
             playerData.discordId(set.getString("discordId"));
             playerData.isBot(set.getBoolean("isBot"));
             playerData.isAlt(set.getBoolean("isAlt"));
+            playerData.pronouns(set.getString("pronouns"));
 
             stmt.close();
 
@@ -98,7 +100,7 @@ public class PlayerTable {
         try {
             var conn = database().connection();
 
-            var stmt = conn.prepareStatement("INSERT INTO players(uuid, firstJoined, lastKnownName, discordId, isBot, isAlt) VALUES (?,?,?,?,?,?);");
+            var stmt = conn.prepareStatement("INSERT INTO players(uuid, firstJoined, lastKnownName, discordId, isBot, isAlt, pronouns) VALUES (?,?,?,?,?,?,?);");
             stmt.setObject(1, playerData.uuid());
             var timestamp = new Timestamp(playerData.firstJoinedDate().getTime());
             stmt.setTimestamp(2, timestamp);
@@ -106,6 +108,7 @@ public class PlayerTable {
             stmt.setString(4, playerData.discordId());
             stmt.setBoolean(5, playerData.isBot());
             stmt.setBoolean(6, playerData.isAlt());
+            stmt.setString(7, playerData.pronouns());
             stmt.execute();
             stmt.close();
 

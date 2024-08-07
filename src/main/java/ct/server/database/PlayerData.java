@@ -16,6 +16,9 @@ public class PlayerData {
     private boolean isBot = false;
     private boolean isAlt = false;
 
+    @Nullable
+    private String pronouns = null;
+
     public PlayerData(UUID uuid) {
         this.uuid = uuid;
     }
@@ -23,7 +26,6 @@ public class PlayerData {
     public UUID uuid() {
         return uuid;
     }
-
 
     public String name() {
         if (name == null) {
@@ -61,5 +63,12 @@ public class PlayerData {
     }
     public void isAlt(boolean isAlt) {
         this.isAlt = isAlt;
+    }
+
+    public String pronouns() {
+        return pronouns;
+    }
+    public void pronouns(@Nullable String pronouns) {
+        this.pronouns = pronouns;
     }
 }

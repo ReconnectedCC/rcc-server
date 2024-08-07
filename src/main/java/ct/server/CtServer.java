@@ -52,6 +52,18 @@ public class CtServer implements ModInitializer {
         return playerTable;
     }
 
+    public static float getTPS() {
+        return currentTps;
+    }
+
+    public static float getMSPT() {
+        return currentMspt;
+    }
+
+    public static int getPlayerCount() {
+        return currentPlayerCount;
+    }
+
     public CtServer() {
         INSTANCE = this;
     }
@@ -96,7 +108,7 @@ public class CtServer implements ModInitializer {
                 PlayerWelcome.PLAYER_WELCOME.invoker().playerWelcome(player, playerData, server);
 
                 // TODO: make it customizable via config
-                broadcastMessage(server, Text.literal("Welcome " + player.getName().getString() + " to the server!").formatted(Formatting.GREEN));
+                broadcastMessage(server, Text.literal("Welcome " + player.getName().getString() + " to the server!").formatted(Formatting.LIGHT_PURPLE));
             } else {
                 if (!playerData.name().equals(player.getName().getString())) {
                     playerData.name(player.getName().getString());
@@ -114,17 +126,5 @@ public class CtServer implements ModInitializer {
         for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             player.sendMessage(message, false);
         }
-    }
-
-    public static float getTPS() {
-        return currentTps;
-    }
-
-    public static float getMSPT() {
-        return currentMspt;
-    }
-
-    public static int getPlayerCount() {
-        return currentPlayerCount;
     }
 }
