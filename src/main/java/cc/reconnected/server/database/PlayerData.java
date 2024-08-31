@@ -1,4 +1,4 @@
-package ct.server.database;
+package cc.reconnected.server.database;
 
 import org.jetbrains.annotations.Nullable;
 

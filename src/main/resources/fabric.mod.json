@@ -1,38 +1,30 @@
 {
 	"schemaVersion": 1,
-	"id": "ct-server",
+	"id": "rcc-server",
 	"version": "${version}",
-	"name": "ct-server",
-	"description": "Server mod for the project CT Minecraft server",
+	"name": "rcc-server",
+	"description": "Server mod for the ReconnectedCC Minecraft server",
 	"authors": [
 		"AlexDevs",
 		"EmmaKnijn"
 	],
 	"contact": {
-		"sources": "https://github.com/project-connecticut/ct-server"
+		"sources": "https://github.com/ReconnectedCC/rcc-server"
 	},
 	"license": "MIT License",
-	"icon": "assets/ct-server/icon.png",
+	"icon": "assets/rcc-server/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-          "ct.server.CtServer"
-		],
-		"client": [
-			"ct.server.CtserverClient"
+			"cc.reconnected.server.RccServer"
 		]
 	},
 	"mixins": [
-		"ct-server.mixins.json",
-		{
-			"config": "ct-server.client.mixins.json",
-			"environment": "client"
-		}
 	],
 	"depends": {
-		"fabricloader": ">=0.15.11",
-		"minecraft": "~1.21",
-		"java": ">=21",
+		"fabricloader": ">=0.16.0",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
 		"fabric-api": "*"
 	}
 }

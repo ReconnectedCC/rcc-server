@@ -1,14 +1,13 @@
-package ct.server;
+package cc.reconnected.server;
 
-import ct.server.database.DatabaseClient;
-import ct.server.database.PlayerData;
-import ct.server.database.PlayerTable;
-import ct.server.events.PlayerWelcome;
-import ct.server.http.ServiceServer;
+import cc.reconnected.server.database.DatabaseClient;
+import cc.reconnected.server.database.PlayerData;
+import cc.reconnected.server.database.PlayerTable;
+import cc.reconnected.server.events.PlayerWelcome;
+import cc.reconnected.server.http.ServiceServer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
-import net.fabricmc.fabric.api.message.v1.ServerMessageDecoratorEvent;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -22,18 +21,18 @@ import java.sql.SQLException;
 import java.util.Date;
 
 
-public class CtServer implements ModInitializer {
-    public static final String MOD_ID = "ct-server";
+public class RccServer implements ModInitializer {
+    public static final String MOD_ID = "rcc-server";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    public static final ct.server.CtServerConfig CONFIG = ct.server.CtServerConfig.createAndLoad();
+    public static final cc.reconnected.server.RccServerConfig CONFIG = cc.reconnected.server.RccServerConfig.createAndLoad();
 
     private static float currentTps = 0;
     private static float currentMspt = 0;
     private static int currentPlayerCount = 0;
 
-    private static CtServer INSTANCE;
-    public static CtServer getInstance() {
+    private static RccServer INSTANCE;
+    public static RccServer getInstance() {
         return INSTANCE;
     }
 
@@ -64,14 +63,14 @@ public class CtServer implements ModInitializer {
         return currentPlayerCount;
     }
 
-    public CtServer() {
+    public RccServer() {
         INSTANCE = this;
     }
 
     @Override
     public void onInitialize() {
 
-        LOGGER.info("Starting ct-server");
+        LOGGER.info("Starting rcc-server");
 
         try {
             // Jumpstart connection
@@ -88,7 +87,7 @@ public class CtServer implements ModInitializer {
         }
 
         ServerTickEvents.END_SERVER_TICK.register(server -> {
-            currentMspt = server.getAverageTickTime();
+            currentMspt = server.getTickTime();
             if (currentMspt != 0) {
                 currentTps = Math.min(20, 1000 / currentMspt);
             }

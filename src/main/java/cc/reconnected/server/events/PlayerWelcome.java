@@ -1,6 +1,6 @@
-package ct.server.events;
+package cc.reconnected.server.events;
 
-import ct.server.database.PlayerData;
+import cc.reconnected.server.database.PlayerData;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.server.MinecraftServer;

@@ -1,6 +1,6 @@
-package ct.server.database;
+package cc.reconnected.server.database;
 
-import ct.server.CtServer;
+import cc.reconnected.server.RccServer;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
@@ -13,7 +13,7 @@ public class PlayerTable {
     private final HashMap<UUID, PlayerData> cache = new HashMap<>();
 
     private DatabaseClient database() {
-        return CtServer.getInstance().database();
+        return RccServer.getInstance().database();
     }
 
     public void ensureDatabaseCreated() {
@@ -35,7 +35,7 @@ public class PlayerTable {
             stmt.close();
 
         } catch (SQLException e) {
-            CtServer.LOGGER.error("Could not create players data tables", e);
+            RccServer.LOGGER.error("Could not create players data tables", e);
         }
     }
 
@@ -73,7 +73,7 @@ public class PlayerTable {
             cache.put(uuid, playerData);
             return playerData;
         } catch (SQLException e) {
-            CtServer.LOGGER.error("Could not get player data from database", e);
+            RccServer.LOGGER.error("Could not get player data from database", e);
             return null;
         }
     }
@@ -90,7 +90,7 @@ public class PlayerTable {
             cache.remove(uuid);
             return true;
         } catch(SQLException e) {
-            CtServer.LOGGER.error("Could not delete player data from database", e);
+            RccServer.LOGGER.error("Could not delete player data from database", e);
             return false;
         }
     }
@@ -115,7 +115,7 @@ public class PlayerTable {
             cache.put(playerData.uuid(), playerData);
             return true;
         } catch (SQLException e) {
-            CtServer.LOGGER.error("Could not get player data from database", e);
+            RccServer.LOGGER.error("Could not get player data from database", e);
             return false;
         }
     }

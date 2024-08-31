@@ -1,9 +1,9 @@
-package ct.server.http;
+package cc.reconnected.server.http;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import ct.server.CtServer;
+import cc.reconnected.server.RccServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -15,7 +15,7 @@ public class ServiceServer {
     }
 
     public ServiceServer() throws IOException {
-        server = HttpServer.create(new InetSocketAddress(CtServer.CONFIG.httpPort()), 0);
+        server = HttpServer.create(new InetSocketAddress(RccServer.CONFIG.httpPort()), 0);
         server.createContext("/tps", new TPSHandler());
         server.createContext("/mspt", new MSPTHandler());
         server.createContext("/player", new PlayerCountHandler());
@@ -28,7 +28,7 @@ public class ServiceServer {
     static class TPSHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
-            var tps = String.valueOf(CtServer.getTPS());
+            var tps = String.valueOf(RccServer.getTPS());
             t.sendResponseHeaders(200, tps.length());
             var body = t.getResponseBody();
             body.write(tps.getBytes());
@@ -39,7 +39,7 @@ public class ServiceServer {
     static class MSPTHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
-            var tps = String.valueOf(CtServer.getMSPT());
+            var tps = String.valueOf(RccServer.getMSPT());
             t.sendResponseHeaders(200, tps.length());
             var body = t.getResponseBody();
             body.write(tps.getBytes());
@@ -50,7 +50,7 @@ public class ServiceServer {
     static class PlayerCountHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
-            var tps = String.valueOf(CtServer.getPlayerCount());
+            var tps = String.valueOf(RccServer.getPlayerCount());
             t.sendResponseHeaders(200, tps.length());
             var body = t.getResponseBody();
             body.write(tps.getBytes());
