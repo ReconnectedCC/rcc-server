@@ -43,6 +43,27 @@ public class PlayerTable {
         cache.remove(uuid);
     }
 
+    public void clearCache() {
+        cache.clear();
+    }
+
+    public boolean exists(UUID uuid) {
+        try {
+            var conn = database().connection();
+
+            var stmt = conn.prepareStatement("SELECT uuid FROM players WHERE uuid = ?;");
+            stmt.setObject(1, uuid);
+            var set = stmt.executeQuery();
+            var exists = set.next();
+            stmt.close();
+
+            return exists;
+        } catch (SQLException e) {
+            RccServer.LOGGER.error("Could not get player data from database", e);
+            return false;
+        }
+    }
+
     @Nullable
     public PlayerData getPlayerData(UUID uuid) {
         if (cache.containsKey(uuid)) {
@@ -79,6 +100,7 @@ public class PlayerTable {
     }
 
     public boolean deletePlayerData(UUID uuid) {
+        cache.remove(uuid);
         try {
             var conn = database().connection();
 
@@ -87,7 +109,6 @@ public class PlayerTable {
             stmt.execute();
             stmt.close();
 
-            cache.remove(uuid);
             return true;
         } catch(SQLException e) {
             RccServer.LOGGER.error("Could not delete player data from database", e);
@@ -95,8 +116,13 @@ public class PlayerTable {
         }
     }
 
-    public boolean updatePlayerData(PlayerData playerData) {
-        deletePlayerData(playerData.uuid());
+    public boolean createPlayerData(PlayerData playerData) {
+        if(exists(playerData.uuid())) {
+            return updatePlayerData(playerData);
+        }
+
+        cache.put(playerData.uuid(), playerData);
+
         try {
             var conn = database().connection();
 
@@ -112,10 +138,37 @@ public class PlayerTable {
             stmt.execute();
             stmt.close();
 
-            cache.put(playerData.uuid(), playerData);
+            return true;
+        } catch(SQLException e) {
+            RccServer.LOGGER.error("Could not create player data from database", e);
+            return false;
+        }
+    }
+
+    public boolean updatePlayerData(PlayerData playerData) {
+        if(!exists(playerData.uuid())) {
+            return createPlayerData(playerData);
+        }
+
+        cache.put(playerData.uuid(), playerData);
+
+        try {
+            var conn = database().connection();
+
+            var stmt = conn.prepareStatement("UPDATE players SET lastknownname = ?, discordid = ?, isBot = ?, isAlt = ?, pronouns = ? WHERE uuid = ?");
+            //var stmt = conn.prepareStatement("INSERT INTO players(uuid, firstJoined, lastKnownName, discordId, isBot, isAlt, pronouns) VALUES (?,?,?,?,?,?,?);");
+            stmt.setString(1, playerData.name());
+            stmt.setString(2, playerData.discordId());
+            stmt.setBoolean(3, playerData.isBot());
+            stmt.setBoolean(4, playerData.isAlt());
+            stmt.setString(5, playerData.pronouns());
+            stmt.setObject(6, playerData.uuid());
+            stmt.execute();
+            stmt.close();
+
             return true;
         } catch (SQLException e) {
-            RccServer.LOGGER.error("Could not get player data from database", e);
+            RccServer.LOGGER.error("Could not update player data on database", e);
             return false;
         }
     }

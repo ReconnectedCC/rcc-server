@@ -1,11 +1,13 @@
 package cc.reconnected.server;
 
+import cc.reconnected.server.commands.RccCommand;
 import cc.reconnected.server.database.DatabaseClient;
 import cc.reconnected.server.database.PlayerData;
 import cc.reconnected.server.database.PlayerTable;
 import cc.reconnected.server.events.PlayerWelcome;
 import cc.reconnected.server.http.ServiceServer;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
@@ -72,6 +74,8 @@ public class RccServer implements ModInitializer {
     public void onInitialize() {
 
         LOGGER.info("Starting rcc-server");
+
+        CommandRegistrationCallback.EVENT.register(RccCommand::register);
 
         try {
             // Jumpstart connection
