@@ -6,6 +6,7 @@ import cc.reconnected.server.database.PlayerTable;
 import cc.reconnected.server.events.PlayerWelcome;
 import cc.reconnected.server.http.ServiceServer;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -91,6 +92,11 @@ public class RccServer implements ModInitializer {
             if (currentMspt != 0) {
                 currentTps = Math.min(20, 1000 / currentMspt);
             }
+        });
+
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            LOGGER.info("Stopping HTTP services");
+            serviceServer.httpServer().stop(0);
         });
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
