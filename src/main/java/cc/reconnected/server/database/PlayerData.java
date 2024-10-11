@@ -46,11 +46,6 @@ public class PlayerData {
         this.lpUser = lpUser;
 
         refreshNodes();
-
-        RccServer.LOGGER.info("Player {} has the following RCC nodes", this.uuid);
-        nodes.forEach((key, value) -> {
-            RccServer.LOGGER.info("{}: {}", key, value);
-        });
     }
 
     public UUID getUuid() {
