@@ -130,6 +130,10 @@ public class PlayerData {
         });
     }
 
+    public String getPrimaryGroup() {
+        return lpUser.getPrimaryGroup();
+    }
+
     public static PlayerData getPlayer(UUID uuid) {
         var lp = luckPerms();
         var userManager = lp.getUserManager();
