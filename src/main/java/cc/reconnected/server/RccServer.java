@@ -1,10 +1,9 @@
 package cc.reconnected.server;
 
 import cc.reconnected.server.commands.RccCommand;
-import cc.reconnected.server.database.DatabaseClient;
 import cc.reconnected.server.database.PlayerData;
-import cc.reconnected.server.database.PlayerTable;
 import cc.reconnected.server.events.PlayerWelcome;
+import cc.reconnected.server.events.Ready;
 import cc.reconnected.server.http.ServiceServer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -12,15 +11,15 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Date;
 
 
@@ -44,14 +43,9 @@ public class RccServer implements ModInitializer {
         return serviceServer;
     }
 
-    private final DatabaseClient database = new DatabaseClient();
-    public DatabaseClient database() {
-        return database;
-    }
-
-    private final PlayerTable playerTable = new PlayerTable();
-    public PlayerTable playerTable() {
-        return playerTable;
+    private LuckPerms luckPerms;
+    public LuckPerms luckPerms() {
+        return luckPerms;
     }
 
     public static float getTPS() {
@@ -78,18 +72,15 @@ public class RccServer implements ModInitializer {
         CommandRegistrationCallback.EVENT.register(RccCommand::register);
 
         try {
-            // Jumpstart connection
-            database.connection();
-            playerTable.ensureDatabaseCreated();
-        } catch (SQLException e) {
-            LOGGER.error("Database error", e);
-        }
-
-        try {
             serviceServer = new ServiceServer();
         } catch (IOException e) {
             LOGGER.error("Unable to start HTTP server", e);
         }
+
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            luckPerms = LuckPermsProvider.get();
+            Ready.READY.invoker().ready(server, luckPerms);
+        });
 
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             currentMspt = server.getTickTime();
@@ -106,23 +97,17 @@ public class RccServer implements ModInitializer {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             currentPlayerCount = server.getCurrentPlayerCount() + 1;
             var player = handler.getPlayer();
-            var playerData = playerTable.getPlayerData(player.getUuid());
-            if(playerData == null) {
-                // new player!
-                playerData = new PlayerData(handler.getPlayer().getUuid());
-                playerData.firstJoinedDate(new Date());
-                playerData.name(player.getName().getString());
-                playerTable.updatePlayerData(playerData);
-
+            var playerData = PlayerData.getPlayer(player.getUuid());
+            playerData.set(PlayerData.KEYS.username, player.getName().getString());
+            var firstJoinedDate = playerData.getDate(PlayerData.KEYS.firstJoinedDate);
+            boolean isNewPlayer = false;
+            if (firstJoinedDate == null) {
+                playerData.setDate(PlayerData.KEYS.firstJoinedDate, new Date());
+                isNewPlayer = true;
+            }
+            if(isNewPlayer) {
                 PlayerWelcome.PLAYER_WELCOME.invoker().playerWelcome(player, playerData, server);
-
-                // TODO: make it customizable via config
-                broadcastMessage(server, Text.literal("Welcome " + player.getName().getString() + " to the server!").formatted(Formatting.LIGHT_PURPLE));
-            } else {
-                if (!playerData.name().equals(player.getName().getString())) {
-                    playerData.name(player.getName().getString());
-                    playerTable.updatePlayerData(playerData);
-                }
+                LOGGER.info("Player {} joined for the first time!", player.getName().getString());
             }
         });
 
