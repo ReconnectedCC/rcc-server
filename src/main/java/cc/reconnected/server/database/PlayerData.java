@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class PlayerData {
@@ -76,9 +77,10 @@ public class PlayerData {
         nodes = rawNodes.stream().collect(Collectors.toMap(MetaNode::getMetaKey, MetaNode::getMetaValue));
     }
 
-    public void set(String key, @Nullable String value) {
+    @SuppressWarnings("UnusedReturnValue")
+    public CompletableFuture<Void> set(String key, @Nullable String value) {
         var node = meta(key, value).build();
-        luckPerms().getUserManager().modifyUser(uuid, user -> {
+        return luckPerms().getUserManager().modifyUser(uuid, user -> {
             user.data().clear(NodeType.META.predicate(mn -> mn.getMetaKey().equals(key)));
             user.data().add(node);
             refreshNodes();
@@ -94,9 +96,9 @@ public class PlayerData {
     public @Nullable MetaNode getNode(String key) {
         return rawNodes.stream().filter(rawNode -> rawNode.getMetaKey().equals(key)).findFirst().orElse(null);
     }
-
-    public void setBoolean(String key, boolean value) {
-        set(key, Boolean.toString(value));
+    @SuppressWarnings("UnusedReturnValue")
+    public CompletableFuture<Void> setBoolean(String key, boolean value) {
+        return set(key, Boolean.toString(value));
     }
 
     public boolean getBoolean(String key) {
@@ -110,10 +112,10 @@ public class PlayerData {
             return defaultValue;
         return Boolean.parseBoolean(nodes.get(nodePrefix + "." + key));
     }
-
-    public void setDate(String key, Date date) {
+    @SuppressWarnings("UnusedReturnValue")
+    public CompletableFuture<Void> setDate(String key, Date date) {
         var dateString = DateTimeFormatter.ISO_INSTANT.format(date.toInstant());
-        set(key, dateString);
+        return set(key, dateString);
     }
 
     public Date getDate(String key) {
@@ -123,9 +125,9 @@ public class PlayerData {
         var ta = DateTimeFormatter.ISO_INSTANT.parse(dateString);
         return Date.from(Instant.from(ta));
     }
-
-    public void delete(String key) {
-        luckPerms().getUserManager().modifyUser(uuid, user -> {
+    @SuppressWarnings("UnusedReturnValue")
+    public CompletableFuture<Void> delete(String key) {
+        return luckPerms().getUserManager().modifyUser(uuid, user -> {
             user.data().clear(NodeType.META.predicate(mn -> mn.getMetaKey().equals(nodePrefix + "." + key)));
         });
     }
