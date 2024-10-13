@@ -1,12 +1,13 @@
 package cc.reconnected.server.trackers;
 
 import cc.reconnected.server.RccServer;
+import cc.reconnected.server.data.StateSaverAndLoader;
+import cc.reconnected.server.database.PlayerData;
 import cc.reconnected.server.events.PlayerActivityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
@@ -16,11 +17,10 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class AfkTracker {
-    private static final int cycleDelay = 10;
-    private static final int absentTimeTrigger = 300 * 20; // 5 mins (* 20 ticks)
-    private final HashMap<UUID, PlayerPosition> playerPositions = new HashMap<>();
-    private final HashMap<UUID, Integer> playerLastUpdate = new HashMap<>();
-    private final HashMap<UUID, Boolean> playerAfkStates = new HashMap<>();
+    private static final int cycleDelay = 1;
+    private static final int absentTimeTrigger = RccServer.CONFIG.afkTimeTrigger() * 20; // seconds * 20 ticks
+
+    private final HashMap<UUID, PlayerState> playerStates = new HashMap<>();
 
     public AfkTracker() {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -31,16 +31,18 @@ public class AfkTracker {
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             final var player = handler.getPlayer();
-            var playerPosition = new PlayerPosition(player);
-            playerPositions.put(player.getUuid(), playerPosition);
-            playerLastUpdate.put(player.getUuid(), server.getTicks());
-            playerAfkStates.put(player.getUuid(), false);
+            playerStates.put(player.getUuid(), new PlayerState(player, server.getTicks()));
         });
 
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-            playerPositions.remove(handler.getPlayer().getUuid());
-            playerLastUpdate.remove(handler.getPlayer().getUuid());
-            playerAfkStates.remove(handler.getPlayer().getUuid());
+            updatePlayerActiveTime(handler.getPlayer(), server.getTicks());
+            playerStates.remove(handler.getPlayer().getUuid());
+
+            // sync to LP
+            var activeTime = String.valueOf(getActiveTime(handler.getPlayer()));
+            var playerData = PlayerData.getPlayer(handler.getPlayer());
+
+            playerData.set(PlayerData.KEYS.activeTime, activeTime).join();
         });
 
         AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
@@ -74,46 +76,60 @@ public class AfkTracker {
         });
 
         ServerMessageEvents.ALLOW_COMMAND_MESSAGE.register((message, source, params) -> {
-            if(!source.isExecutedByPlayer())
+            if (!source.isExecutedByPlayer())
                 return true;
             resetAfkState(source.getPlayer(), source.getServer());
             return true;
         });
     }
 
-    public void updatePlayers(MinecraftServer server) {
-        var players = server.getPlayerManager().getPlayerList();
+
+    private void updatePlayer(ServerPlayerEntity player, MinecraftServer server) {
         var currentTick = server.getTicks();
+        var playerState = playerStates.computeIfAbsent(player.getUuid(), uuid -> new PlayerState(player, currentTick));
+
+        var oldPosition = playerState.position;
+        var newPosition = new PlayerPosition(player);
+        if (!oldPosition.equals(newPosition)) {
+            playerState.position = newPosition;
+            resetAfkState(player, server);
+            return;
+        }
+
+        if (playerState.isAfk)
+            return;
+
+        if ((playerState.lastUpdate + absentTimeTrigger) <= currentTick) {
+            // player is afk after 5 mins
+            updatePlayerActiveTime(player, currentTick);
+            playerState.isAfk = true;
+            PlayerActivityEvents.AFK.invoker().onAfk(player, server);
+        }
+    }
+
+    private void updatePlayerActiveTime(ServerPlayerEntity player, int currentTick) {
+        var playerState = playerStates.get(player.getUuid());
+        if(!playerState.isAfk) {
+            var worldPlayerData = StateSaverAndLoader.getPlayerState(player);
+            var interval = currentTick - playerState.activeStart;
+            worldPlayerData.activeTime += interval / 20;
+        }
+    }
+
+    private void updatePlayers(MinecraftServer server) {
+        var players = server.getPlayerManager().getPlayerList();
         players.forEach(player -> {
-            if (!playerPositions.containsKey(player.getUuid())) {
-                playerPositions.put(player.getUuid(), new PlayerPosition(player));
-                return;
-            }
-            var oldPosition = playerPositions.get(player.getUuid());
-            var newPosition = new PlayerPosition(player);
-            if (!oldPosition.equals(newPosition)) {
-                playerPositions.put(player.getUuid(), newPosition);
-                resetAfkState(player, server);
-                return;
-            }
-
-            if (playerAfkStates.get(player.getUuid())) {
-                return;
-            }
-
-            if ((playerLastUpdate.get(player.getUuid()) + absentTimeTrigger) <= currentTick) {
-                // player is afk after 5 mins
-                playerAfkStates.put(player.getUuid(), true);
-                PlayerActivityEvents.AFK.invoker().onAfk(player, server);
-            }
+            updatePlayer(player, server);
         });
     }
 
     private void resetAfkState(ServerPlayerEntity player, MinecraftServer server) {
-        playerLastUpdate.put(player.getUuid(), server.getTicks());
-        if (playerAfkStates.get(player.getUuid())) {
+        var playerState = playerStates.get(player.getUuid());
+        playerState.lastUpdate = server.getTicks();
+        if (playerState.isAfk) {
+            playerState.isAfk = false;
+            playerState.activeStart = server.getTicks();
             PlayerActivityEvents.AFK_RETURN.invoker().onAfkReturn(player, server);
-            playerAfkStates.put(player.getUuid(), false);
         }
     }
 
@@ -141,4 +157,47 @@ public class AfkTracker {
             pitch = player.getPitch();
         }
     }
+
+    public static class PlayerState {
+        public PlayerPosition position;
+        public int lastUpdate;
+        public boolean isAfk;
+        public int activeStart;
+
+        public PlayerState(ServerPlayerEntity player, int lastUpdate) {
+            this.position = new PlayerPosition(player);
+            this.lastUpdate = lastUpdate;
+            this.isAfk = false;
+            this.activeStart = lastUpdate;
+        }
+    }
+
+    public boolean isPlayerAfk(UUID playerUuid) {
+        if (!playerStates.containsKey(playerUuid)) {
+            return false;
+        }
+        return playerStates.get(playerUuid).isAfk;
+    }
+
+    public void setPlayerAfk(ServerPlayerEntity player, boolean afk) {
+        if (!playerStates.containsKey(player.getUuid())) {
+            return;
+        }
+
+        var server = player.getWorld().getServer();
+
+        if (afk) {
+            playerStates.get(player.getUuid()).lastUpdate = -absentTimeTrigger - 20; // just to be sure
+        } else {
+            resetAfkState(player, server);
+        }
+
+        updatePlayer(player, server);
+    }
+
+    public int getActiveTime(ServerPlayerEntity player) {
+        var worldPlayerData = StateSaverAndLoader.getPlayerState(player);
+        return worldPlayerData.activeTime;
+    }
+
 }

@@ -1,5 +1,6 @@
 package cc.reconnected.server;
 
+import cc.reconnected.server.commands.AfkCommand;
 import cc.reconnected.server.commands.RccCommand;
 import cc.reconnected.server.database.PlayerData;
 import cc.reconnected.server.events.PlayerActivityEvents;
@@ -9,13 +10,13 @@ import cc.reconnected.server.http.ServiceServer;
 import cc.reconnected.server.trackers.AfkTracker;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -78,6 +79,7 @@ public class RccServer implements ModInitializer {
         LOGGER.info("Starting rcc-server");
 
         CommandRegistrationCallback.EVENT.register(RccCommand::register);
+        CommandRegistrationCallback.EVENT.register(AfkCommand::register);
 
         try {
             serviceServer = new ServiceServer();
@@ -124,11 +126,30 @@ public class RccServer implements ModInitializer {
             currentPlayerCount = server.getCurrentPlayerCount() - 1;
         });
 
+        PlayerActivityEvents.AFK.register((player, server) -> {
+            LOGGER.info("{} is AFK. Active time: {} seconds.", player, afkTracker.getActiveTime(player));
+        });
+
+        PlayerActivityEvents.AFK_RETURN.register((player, server) -> {
+            LOGGER.info("{} is no longer AFK. Active time: {} seconds.", player, afkTracker.getActiveTime(player));
+        });
     }
 
     public void broadcastMessage(MinecraftServer server, Text message) {
         for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             player.sendMessage(message, false);
         }
+    }
+
+    public boolean isPlayerAfk(PlayerEntity player) {
+        return afkTracker.isPlayerAfk(player.getUuid());
+    }
+
+    public void setPlayerAfk(ServerPlayerEntity player, boolean afk) {
+        afkTracker.setPlayerAfk(player, afk);
+    }
+
+    public int getActiveTime(ServerPlayerEntity player) {
+        return afkTracker().getActiveTime(player);
     }
 }

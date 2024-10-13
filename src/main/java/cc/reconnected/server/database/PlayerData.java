@@ -31,6 +31,7 @@ public class PlayerData {
         public static final String pronouns = "pronouns";
         public static final String firstJoinedDate = "first_joined_date";
         public static final String supporterLevel = "supporter_level";
+        public static final String activeTime = "active_time";
     }
 
     private final User lpUser;

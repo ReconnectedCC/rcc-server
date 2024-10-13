@@ -1,11 +1,9 @@
 package cc.reconnected.server.commands;
 
-import cc.reconnected.server.RccServer;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
