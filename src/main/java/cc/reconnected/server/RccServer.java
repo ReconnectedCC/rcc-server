@@ -2,11 +2,14 @@ package cc.reconnected.server;
 
 import cc.reconnected.server.commands.RccCommand;
 import cc.reconnected.server.database.PlayerData;
+import cc.reconnected.server.events.PlayerActivityEvents;
 import cc.reconnected.server.events.PlayerWelcome;
 import cc.reconnected.server.events.Ready;
 import cc.reconnected.server.http.ServiceServer;
+import cc.reconnected.server.trackers.AfkTracker;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
@@ -48,6 +51,11 @@ public class RccServer implements ModInitializer {
         return luckPerms;
     }
 
+    private AfkTracker afkTracker;
+    public AfkTracker afkTracker() {
+        return afkTracker;
+    }
+
     public static float getTPS() {
         return currentTps;
     }
@@ -79,6 +87,7 @@ public class RccServer implements ModInitializer {
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             luckPerms = LuckPermsProvider.get();
+            afkTracker = new AfkTracker();
             Ready.READY.invoker().ready(server, luckPerms);
         });
 
@@ -114,6 +123,7 @@ public class RccServer implements ModInitializer {
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             currentPlayerCount = server.getCurrentPlayerCount() - 1;
         });
+
     }
 
     public void broadcastMessage(MinecraftServer server, Text message) {
