@@ -39,10 +39,10 @@ public class AfkTracker {
             playerStates.remove(handler.getPlayer().getUuid());
 
             // sync to LP
-            var activeTime = String.valueOf(getActiveTime(handler.getPlayer()));
-            var playerData = PlayerData.getPlayer(handler.getPlayer());
+            //var activeTime = String.valueOf(getActiveTime(handler.getPlayer()));
+            //var playerData = PlayerData.getPlayer(handler.getPlayer());
 
-            playerData.set(PlayerData.KEYS.activeTime, activeTime).join();
+            //playerData.set(PlayerData.KEYS.activeTime, activeTime).join();
         });
 
         AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
