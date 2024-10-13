@@ -109,7 +109,7 @@ public class AfkTracker {
 
     private void updatePlayerActiveTime(ServerPlayerEntity player, int currentTick) {
         var playerState = playerStates.get(player.getUuid());
-        if(!playerState.isAfk) {
+        if (!playerState.isAfk) {
             var worldPlayerData = StateSaverAndLoader.getPlayerState(player);
             var interval = currentTick - playerState.activeStart;
             worldPlayerData.activeTime += interval / 20;
@@ -124,6 +124,9 @@ public class AfkTracker {
     }
 
     private void resetAfkState(ServerPlayerEntity player, MinecraftServer server) {
+        if (!playerStates.containsKey(player.getUuid()))
+            return;
+
         var playerState = playerStates.get(player.getUuid());
         playerState.lastUpdate = server.getTicks();
         if (playerState.isAfk) {
