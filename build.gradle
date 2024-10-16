@@ -93,13 +93,12 @@ publishing {
 		// retrieving dependencies.
 
 
-		// TODO: change to CT server once it's all ready
 		maven {
-			name = "AlexDevs"
-			url = "https://maven.alexdevs.me/releases"
+			name = "ReconnectedCC"
+			url = "https://maven.reconnected.cc/releases"
 			credentials {
-				username = System.getenv("MAVEN_USERNAME")
-				password = System.getenv("MAVEN_PASSWORD")
+				username = System.getenv("MAVEN_USERNAME_RCC")
+				password = System.getenv("MAVEN_PASSWORD_RCC")
 			}
 		}
 	}
