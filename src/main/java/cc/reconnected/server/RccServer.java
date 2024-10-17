@@ -141,7 +141,9 @@ public class RccServer implements ModInitializer {
             var displayName =  JSONComponentSerializer.json().deserialize(displayNameJson);
 
             var message = MiniMessage.miniMessage().deserialize(CONFIG.afkMessage(),
-                    Placeholder.component("name", displayName)
+                    Placeholder.component("displayname", displayName),
+                    Placeholder.unparsed("username", player.getGameProfile().getName()),
+                    Placeholder.unparsed("uuid", player.getUuid().toString())
             );
 
             broadcastMessage(server, message);
