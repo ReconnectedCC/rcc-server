@@ -14,6 +14,10 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.minecraft.entity.player.PlayerEntity;
@@ -81,16 +85,18 @@ public class RccServer implements ModInitializer {
         CommandRegistrationCallback.EVENT.register(RccCommand::register);
         CommandRegistrationCallback.EVENT.register(AfkCommand::register);
 
-        try {
-            serviceServer = new ServiceServer();
-        } catch (IOException e) {
-            LOGGER.error("Unable to start HTTP server", e);
-        }
-
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             luckPerms = LuckPermsProvider.get();
             afkTracker = new AfkTracker();
             Ready.READY.invoker().ready(server, luckPerms);
+
+            if(CONFIG.enableHttpApi()) {
+                try {
+                    serviceServer = new ServiceServer();
+                } catch (IOException e) {
+                    LOGGER.error("Unable to start HTTP server", e);
+                }
+            }
         });
 
         ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -101,8 +107,10 @@ public class RccServer implements ModInitializer {
         });
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-            LOGGER.info("Stopping HTTP services");
-            serviceServer.httpServer().stop(0);
+            if(CONFIG.enableHttpApi()) {
+                LOGGER.info("Stopping HTTP services");
+                serviceServer.httpServer().stop(0);
+            }
         });
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
@@ -127,17 +135,43 @@ public class RccServer implements ModInitializer {
         });
 
         PlayerActivityEvents.AFK.register((player, server) -> {
-            LOGGER.info("{} is AFK. Active time: {} seconds.", player, afkTracker.getActiveTime(player));
+            LOGGER.info("{} is AFK. Active time: {} seconds.", player.getGameProfile().getName(), afkTracker.getActiveTime(player));
+
+            var displayNameJson = Text.Serializer.toJson(player.getDisplayName());
+            var displayName =  JSONComponentSerializer.json().deserialize(displayNameJson);
+
+            var message = MiniMessage.miniMessage().deserialize(CONFIG.afkMessage(),
+                    Placeholder.component("name", displayName)
+            );
+
+            broadcastMessage(server, message);
         });
 
         PlayerActivityEvents.AFK_RETURN.register((player, server) -> {
-            LOGGER.info("{} is no longer AFK. Active time: {} seconds.", player, afkTracker.getActiveTime(player));
+            LOGGER.info("{} is no longer AFK. Active time: {} seconds.", player.getGameProfile().getName(), afkTracker.getActiveTime(player));
+
+            var displayNameJson = Text.Serializer.toJson(player.getDisplayName());
+            var displayName =  JSONComponentSerializer.json().deserialize(displayNameJson);
+
+            var message = MiniMessage.miniMessage().deserialize(CONFIG.afkReturnMessage(),
+                    Placeholder.component("displayname", displayName),
+                    Placeholder.unparsed("username", player.getGameProfile().getName()),
+                    Placeholder.unparsed("uuid", player.getUuid().toString())
+            );
+
+            broadcastMessage(server, message);
         });
     }
 
     public void broadcastMessage(MinecraftServer server, Text message) {
         for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             player.sendMessage(message, false);
+        }
+    }
+
+    public void broadcastMessage(MinecraftServer server, Component message) {
+        for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            player.sendMessage(message);
         }
     }
 

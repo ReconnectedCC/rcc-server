@@ -19,6 +19,7 @@ repositories {
 
 	maven { url 'https://maven.wispforest.io' }
 	maven { url 'https://maven.nucleoid.xyz' }
+	maven { url 'https://maven.reconnected.cc/releases' }
 }
 
 loom {
@@ -46,6 +47,8 @@ dependencies {
 
 	compileOnly "net.luckperms:api:${project.luckpermsapi_version}"
 	include modImplementation("me.lucko:fabric-permissions-api:${project.permissions_api_version}")
+
+	include modImplementation("net.kyori:adventure-platform-fabric:${project.adventure_version}")
 }
 
 processResources {

@@ -8,4 +8,7 @@ public class RccServerConfigModel {
     public int httpPort = 25581;
 
     public int afkTimeTrigger = 300;
+
+    public String afkMessage = "<gray><displayname> is now AFK</gray>";
+    public String afkReturnMessage = "<gray><displayname> is no longer AFK</gray>";
 }
