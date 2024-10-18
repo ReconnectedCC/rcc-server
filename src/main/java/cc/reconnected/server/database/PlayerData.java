@@ -88,6 +88,12 @@ public class PlayerData {
         });
     }
 
+    @SuppressWarnings("UnusedReturnValue")
+    public CompletableFuture<Void> set(String key, @Nullable String value, boolean replace) {
+        if (replace) delete(key);
+        return set(key, value);
+    }
+
     public @Nullable String get(String key) {
         if (!nodes.containsKey(nodePrefix + "." + key))
             return null;
