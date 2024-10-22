@@ -33,10 +33,8 @@ public class ReplyCommand {
         }
 
         var targetName = TellCommand.lastSender.get(senderName);
-        var playerManager = source.getServer().getPlayerManager();
 
         TellCommand.sendDirectMessage(targetName, source, message);
-
 
         return 1;
     }
