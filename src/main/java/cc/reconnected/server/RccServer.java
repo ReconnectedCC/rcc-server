@@ -1,6 +1,8 @@
 package cc.reconnected.server;
 
 import cc.reconnected.server.commands.AfkCommand;
+import cc.reconnected.server.commands.ReplyCommand;
+import cc.reconnected.server.commands.TellCommand;
 import cc.reconnected.server.database.PlayerData;
 import cc.reconnected.server.events.PlayerActivityEvents;
 import cc.reconnected.server.events.PlayerWelcome;
@@ -82,6 +84,8 @@ public class RccServer implements ModInitializer {
         LOGGER.info("Starting rcc-server");
 
         CommandRegistrationCallback.EVENT.register(AfkCommand::register);
+        CommandRegistrationCallback.EVENT.register(TellCommand::register);
+        CommandRegistrationCallback.EVENT.register(ReplyCommand::register);
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             luckPerms = LuckPermsProvider.get();

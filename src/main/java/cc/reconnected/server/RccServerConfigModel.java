@@ -11,4 +11,7 @@ public class RccServerConfigModel {
 
     public String afkMessage = "<gray><displayname> is now AFK</gray>";
     public String afkReturnMessage = "<gray><displayname> is no longer AFK</gray>";
+
+    public String tellMessage = "<gold>[</gold><source> <gray>→</gray> <target><gold>]</gold> <message>";
+    public String tellMessageSpy = "\uD83D\uDC41 <gray>[<source> → <target>]</gray> <message>";
 }

@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "cc.reconnected.server.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [],
+  "client": [],
+  "server": [
+    "MessageCommandMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
