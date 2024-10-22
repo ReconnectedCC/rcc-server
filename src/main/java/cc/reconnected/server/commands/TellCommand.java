@@ -71,6 +71,7 @@ public class TellCommand {
                 Placeholder.component("message", parsedMessage.toText()));
 
         lastSender.put(targetName, source.getName());
+        lastSender.put(source.getName(), targetName);
 
         if (!source.getName().equals(targetName)) {
             source.sendMessage(text);
