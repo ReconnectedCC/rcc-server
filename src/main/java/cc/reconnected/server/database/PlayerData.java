@@ -103,6 +103,7 @@ public class PlayerData {
     public @Nullable MetaNode getNode(String key) {
         return rawNodes.stream().filter(rawNode -> rawNode.getMetaKey().equals(key)).findFirst().orElse(null);
     }
+
     @SuppressWarnings("UnusedReturnValue")
     public CompletableFuture<Void> setBoolean(String key, boolean value) {
         return set(key, Boolean.toString(value));
@@ -119,6 +120,7 @@ public class PlayerData {
             return defaultValue;
         return Boolean.parseBoolean(nodes.get(nodePrefix + "." + key));
     }
+
     @SuppressWarnings("UnusedReturnValue")
     public CompletableFuture<Void> setDate(String key, Date date) {
         var dateString = DateTimeFormatter.ISO_INSTANT.format(date.toInstant());
@@ -132,6 +134,7 @@ public class PlayerData {
         var ta = DateTimeFormatter.ISO_INSTANT.parse(dateString);
         return Date.from(Instant.from(ta));
     }
+
     @SuppressWarnings("UnusedReturnValue")
     public CompletableFuture<Void> delete(String key) {
         return luckPerms().getUserManager().modifyUser(uuid, user -> {

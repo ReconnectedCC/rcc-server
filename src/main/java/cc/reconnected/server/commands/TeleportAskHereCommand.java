@@ -53,7 +53,7 @@ public class TeleportAskHereCommand {
         }
 
         var request = new TeleportAskCommand.TeleportRequest(target.getUuid(), player.getUuid());
-        var targetRequests  = RccServer.teleportRequests.get(target.getUuid());
+        var targetRequests = RccServer.teleportRequests.get(target.getUuid());
         targetRequests.addLast(request);
 
         var requestMessage = Component.empty()

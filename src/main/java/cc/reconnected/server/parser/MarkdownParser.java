@@ -7,7 +7,7 @@ import static eu.pb4.placeholders.api.parsers.MarkdownLiteParserV1.MarkdownForma
 
 
 public class MarkdownParser {
-    public static final MarkdownFormat[] ALL = new MarkdownFormat[] {
+    public static final MarkdownFormat[] ALL = new MarkdownFormat[]{
             MarkdownFormat.QUOTE,
             MarkdownFormat.BOLD,
             MarkdownFormat.ITALIC,

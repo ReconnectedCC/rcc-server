@@ -2,21 +2,14 @@ package cc.reconnected.server.commands;
 
 import cc.reconnected.server.RccServer;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.UuidArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import static net.minecraft.server.command.CommandManager.*;
 
@@ -85,7 +78,7 @@ public class TeleportAcceptCommand {
             return;
         }
 
-        if(player.getUuid().equals(request.target)) {
+        if (player.getUuid().equals(request.target)) {
             // accepted a tpa from other to self
             context.getSource().sendFeedback(() -> Text.literal("Teleport request accepted.").formatted(Formatting.GREEN), false);
             sourcePlayer.sendMessage(Text.literal("Teleporting...").formatted(Formatting.GOLD), false);

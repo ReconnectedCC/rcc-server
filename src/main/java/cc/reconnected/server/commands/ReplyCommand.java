@@ -29,7 +29,7 @@ public class ReplyCommand {
         var senderName = source.getName();
         var message = StringArgumentType.getString(context, "message");
 
-        if(!TellCommand.lastSender.containsKey(senderName)) {
+        if (!TellCommand.lastSender.containsKey(senderName)) {
             source.sendFeedback(() -> Text.literal("You have no one to reply to.").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
             return 1;
         }

@@ -1,7 +1,6 @@
 package cc.reconnected.server.commands;
 
 import cc.reconnected.server.RccServer;
-import cc.reconnected.server.struct.ServerPosition;
 import com.mojang.brigadier.CommandDispatcher;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.CommandRegistryAccess;
@@ -17,7 +16,7 @@ public class BackCommand {
         var rootCommand = literal("back")
                 .requires(Permissions.require("rcc.command.back", true))
                 .executes(context -> {
-                    if(!context.getSource().isExecutedByPlayer()) {
+                    if (!context.getSource().isExecutedByPlayer()) {
                         context.getSource().sendFeedback(() -> Text.of("This command can only be executed by players!"), false);
                         return 1;
                     }
@@ -25,7 +24,7 @@ public class BackCommand {
                     var player = context.getSource().getPlayer();
 
                     var lastPosition = RccServer.lastPlayerPositions.get(player.getUuid());
-                    if(lastPosition == null) {
+                    if (lastPosition == null) {
                         context.getSource().sendFeedback(() -> Text.literal("There is no position to return back to.").formatted(Formatting.RED), false);
                         return 1;
                     }

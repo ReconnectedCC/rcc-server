@@ -12,8 +12,6 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import java.util.ArrayList;
-
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -81,7 +79,7 @@ public class TeleportDenyCommand {
             otherPlayer = playerManager.getPlayer(request.target);
         }
 
-        if(otherPlayer != null) {
+        if (otherPlayer != null) {
             otherPlayer.sendMessage(Text.empty().append(player.getDisplayName()).append(Text.literal(" denied your teleport request.").formatted(Formatting.RED)));
         }
         context.getSource().sendFeedback(() -> Text.literal("You denied the teleport request.").formatted(Formatting.GOLD), false);

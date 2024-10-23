@@ -39,7 +39,7 @@ public class GodCommand {
                         .executes(context -> {
                             var playerName = StringArgumentType.getString(context, "player");
                             var player = context.getSource().getServer().getPlayerManager().getPlayer(playerName);
-                            if(player == null) {
+                            if (player == null) {
                                 context.getSource().sendFeedback(() -> Text.literal("Player not found").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
                                 return 1;
                             }

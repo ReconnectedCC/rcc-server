@@ -78,9 +78,9 @@ public class TellCommand {
         if (!source.getName().equals(targetName)) {
             source.sendMessage(text);
         }
-        if(targetPlayer != null) {
+        if (targetPlayer != null) {
             targetPlayer.sendMessage(text);
-            if(source.isExecutedByPlayer()) {
+            if (source.isExecutedByPlayer()) {
                 source.getServer().sendMessage(text);
             }
         } else {
@@ -96,13 +96,14 @@ public class TellCommand {
                 Placeholder.component("message", parsedMessage.toText()));
         source.getServer().getPlayerManager().getPlayerList().forEach(player -> {
             var playerName = player.getGameProfile().getName();
-            if(playerName.equals(targetName) || playerName.equals(source.getName())) {
+            if (playerName.equals(targetName) || playerName.equals(source.getName())) {
                 return;
             }
             var playerPerms = playerAdapter.getPermissionData(player);
-            if(playerPerms.checkPermission("rcc.tell.spy").asBoolean()) {
+            if (playerPerms.checkPermission("rcc.tell.spy").asBoolean()) {
                 player.sendMessage(spyText);
-            };
+            }
+            ;
         });
     }
 }

@@ -16,7 +16,7 @@ public class AfkCommand {
                 .requires(Permissions.require("rcc.command.afk", true))
                 .executes(context -> {
 
-                    if(!context.getSource().isExecutedByPlayer()) {
+                    if (!context.getSource().isExecutedByPlayer()) {
                         context.getSource().sendFeedback(() -> Text.of("This command can only be executed by players!"), false);
                         return 1;
                     }

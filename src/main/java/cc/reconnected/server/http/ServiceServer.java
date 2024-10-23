@@ -10,6 +10,7 @@ import java.net.InetSocketAddress;
 
 public class ServiceServer {
     private final HttpServer server;
+
     public HttpServer httpServer() {
         return this.server;
     }

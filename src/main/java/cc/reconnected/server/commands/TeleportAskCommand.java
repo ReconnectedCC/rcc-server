@@ -5,8 +5,6 @@ import cc.reconnected.server.struct.ServerPosition;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.event.ClickCallback;
@@ -63,7 +61,7 @@ public class TeleportAskCommand {
         }
 
         var request = new TeleportRequest(player.getUuid(), target.getUuid());
-        var targetRequests  = RccServer.teleportRequests.get(target.getUuid());
+        var targetRequests = RccServer.teleportRequests.get(target.getUuid());
         targetRequests.addLast(request);
 
         var requestMessage = Component.empty()
@@ -81,11 +79,6 @@ public class TeleportAskCommand {
     }
 
     public static Component makeButton(ComponentLike text, ComponentLike hoverText, String command) {
-        var options = ClickCallback.Options.builder()
-                .uses(1)
-                .lifetime(Duration.ofSeconds(RccServer.CONFIG.teleportRequestTimeout()))
-                .build();
-
         return Component.empty()
                 .append(Component.text("["))
                 .append(text)
