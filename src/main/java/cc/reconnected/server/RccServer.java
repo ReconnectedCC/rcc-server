@@ -85,6 +85,8 @@ public class RccServer implements ModInitializer {
         CommandRegistrationCallback.EVENT.register(TellCommand::register);
         CommandRegistrationCallback.EVENT.register(ReplyCommand::register);
             FlyCommand.register(dispatcher, registryAccess, environment);
+            GodCommand.register(dispatcher, registryAccess, environment);
+        });
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             luckPerms = LuckPermsProvider.get();
