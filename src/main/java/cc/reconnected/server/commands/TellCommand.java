@@ -5,6 +5,7 @@ import cc.reconnected.server.parser.MarkdownParser;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.minecraft.command.CommandRegistryAccess;
@@ -26,6 +27,7 @@ public class TellCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
         var messageNode = dispatcher.register(literal("msg")
+                .requires(Permissions.require("rcc.command.tell", true))
                 .then(argument("player", StringArgumentType.word())
                         .suggests((context, builder) -> {
                             var playerManager = context.getSource().getServer().getPlayerManager();

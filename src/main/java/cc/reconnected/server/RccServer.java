@@ -41,21 +41,25 @@ public class RccServer implements ModInitializer {
     private static int currentPlayerCount = 0;
 
     private static RccServer INSTANCE;
+
     public static RccServer getInstance() {
         return INSTANCE;
     }
 
     private ServiceServer serviceServer;
+
     public ServiceServer serviceServer() {
         return serviceServer;
     }
 
     private LuckPerms luckPerms;
+
     public LuckPerms luckPerms() {
         return luckPerms;
     }
 
     private AfkTracker afkTracker;
+
     public AfkTracker afkTracker() {
         return afkTracker;
     }
@@ -84,6 +88,10 @@ public class RccServer implements ModInitializer {
         CommandRegistrationCallback.EVENT.register(AfkCommand::register);
         CommandRegistrationCallback.EVENT.register(TellCommand::register);
         CommandRegistrationCallback.EVENT.register(ReplyCommand::register);
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            AfkCommand.register(dispatcher, registryAccess, environment);
+            TellCommand.register(dispatcher, registryAccess, environment);
+            ReplyCommand.register(dispatcher, registryAccess, environment);
             FlyCommand.register(dispatcher, registryAccess, environment);
             GodCommand.register(dispatcher, registryAccess, environment);
         });
@@ -93,7 +101,7 @@ public class RccServer implements ModInitializer {
             afkTracker = new AfkTracker();
             Ready.READY.invoker().ready(server, luckPerms);
 
-            if(CONFIG.enableHttpApi()) {
+            if (CONFIG.enableHttpApi()) {
                 try {
                     serviceServer = new ServiceServer();
                 } catch (IOException e) {
@@ -110,7 +118,7 @@ public class RccServer implements ModInitializer {
         });
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-            if(CONFIG.enableHttpApi()) {
+            if (CONFIG.enableHttpApi()) {
                 LOGGER.info("Stopping HTTP services");
                 serviceServer.httpServer().stop(0);
             }
@@ -127,7 +135,7 @@ public class RccServer implements ModInitializer {
                 playerData.setDate(PlayerData.KEYS.firstJoinedDate, new Date());
                 isNewPlayer = true;
             }
-            if(isNewPlayer) {
+            if (isNewPlayer) {
                 PlayerWelcome.PLAYER_WELCOME.invoker().playerWelcome(player, playerData, server);
                 LOGGER.info("Player {} joined for the first time!", player.getName().getString());
             }
@@ -141,7 +149,7 @@ public class RccServer implements ModInitializer {
             LOGGER.info("{} is AFK. Active time: {} seconds.", player.getGameProfile().getName(), afkTracker.getActiveTime(player));
 
             var displayNameJson = Text.Serializer.toJson(player.getDisplayName());
-            var displayName =  JSONComponentSerializer.json().deserialize(displayNameJson);
+            var displayName = JSONComponentSerializer.json().deserialize(displayNameJson);
 
             var message = MiniMessage.miniMessage().deserialize(CONFIG.afkMessage(),
                     Placeholder.component("displayname", displayName),
@@ -156,7 +164,7 @@ public class RccServer implements ModInitializer {
             LOGGER.info("{} is no longer AFK. Active time: {} seconds.", player.getGameProfile().getName(), afkTracker.getActiveTime(player));
 
             var displayNameJson = Text.Serializer.toJson(player.getDisplayName());
-            var displayName =  JSONComponentSerializer.json().deserialize(displayNameJson);
+            var displayName = JSONComponentSerializer.json().deserialize(displayNameJson);
 
             var message = MiniMessage.miniMessage().deserialize(CONFIG.afkReturnMessage(),
                     Placeholder.component("displayname", displayName),
@@ -169,13 +177,13 @@ public class RccServer implements ModInitializer {
     }
 
     public void broadcastMessage(MinecraftServer server, Text message) {
-        for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             player.sendMessage(message, false);
         }
     }
 
     public void broadcastMessage(MinecraftServer server, Component message) {
-        for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             player.sendMessage(message);
         }
     }

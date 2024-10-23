@@ -3,6 +3,7 @@ package cc.reconnected.server.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -16,6 +17,7 @@ import static net.minecraft.server.command.CommandManager.*;
 public class ReplyCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
         var messageNode = dispatcher.register(literal("reply")
+                .requires(Permissions.require("rcc.command.tell", true))
                 .then(argument("message", StringArgumentType.greedyString())
                         .executes(ReplyCommand::execute)));
 

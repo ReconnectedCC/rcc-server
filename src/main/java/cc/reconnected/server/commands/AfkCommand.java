@@ -13,7 +13,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class AfkCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
         var rootCommand = literal("afk")
-                .requires(Permissions.require("rcc.afk.command", true))
+                .requires(Permissions.require("rcc.command.afk", true))
                 .executes(context -> {
 
                     if(!context.getSource().isExecutedByPlayer()) {
