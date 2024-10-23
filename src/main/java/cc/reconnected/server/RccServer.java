@@ -85,9 +85,6 @@ public class RccServer implements ModInitializer {
 
         LOGGER.info("Starting rcc-server");
 
-        CommandRegistrationCallback.EVENT.register(AfkCommand::register);
-        CommandRegistrationCallback.EVENT.register(TellCommand::register);
-        CommandRegistrationCallback.EVENT.register(ReplyCommand::register);
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             AfkCommand.register(dispatcher, registryAccess, environment);
             TellCommand.register(dispatcher, registryAccess, environment);
