@@ -14,4 +14,6 @@ public class RccServerConfigModel {
 
     public String tellMessage = "<gold>[</gold><source> <gray>→</gray> <target><gold>]</gold> <message>";
     public String tellMessageSpy = "\uD83D\uDC41 <gray>[<source> → <target>]</gray> <message>";
+
+    public int teleportRequestTimeout = 120;
 }

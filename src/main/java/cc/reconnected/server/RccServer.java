@@ -6,6 +6,7 @@ import cc.reconnected.server.events.PlayerActivityEvents;
 import cc.reconnected.server.events.PlayerWelcome;
 import cc.reconnected.server.events.Ready;
 import cc.reconnected.server.http.ServiceServer;
+import cc.reconnected.server.struct.ServerPosition;
 import cc.reconnected.server.trackers.AfkTracker;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -28,6 +29,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 
 public class RccServer implements ModInitializer {
@@ -80,15 +84,22 @@ public class RccServer implements ModInitializer {
         INSTANCE = this;
     }
 
+    public static final ConcurrentHashMap<UUID, ConcurrentLinkedDeque<TeleportAskCommand.TeleportRequest>> teleportRequests = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<UUID, ServerPosition> lastPlayerPositions = new ConcurrentHashMap<>();
+
     @Override
     public void onInitialize() {
-
         LOGGER.info("Starting rcc-server");
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             AfkCommand.register(dispatcher, registryAccess, environment);
             TellCommand.register(dispatcher, registryAccess, environment);
             ReplyCommand.register(dispatcher, registryAccess, environment);
+            TeleportAskCommand.register(dispatcher, registryAccess, environment);
+            TeleportAskHereCommand.register(dispatcher, registryAccess, environment);
+            TeleportAcceptCommand.register(dispatcher, registryAccess, environment);
+            TeleportDenyCommand.register(dispatcher, registryAccess, environment);
+            BackCommand.register(dispatcher, registryAccess, environment);
             FlyCommand.register(dispatcher, registryAccess, environment);
             GodCommand.register(dispatcher, registryAccess, environment);
         });
@@ -112,6 +123,14 @@ public class RccServer implements ModInitializer {
             if (currentMspt != 0) {
                 currentTps = Math.min(20, 1000 / currentMspt);
             }
+
+            teleportRequests.forEach((recipient, requestList) -> {
+                requestList.forEach(request -> {
+                    if (request.remainingTicks-- == 0) {
+                        requestList.remove(request);
+                    }
+                });
+            });
         });
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
@@ -136,10 +155,15 @@ public class RccServer implements ModInitializer {
                 PlayerWelcome.PLAYER_WELCOME.invoker().playerWelcome(player, playerData, server);
                 LOGGER.info("Player {} joined for the first time!", player.getName().getString());
             }
+
+            teleportRequests.put(player.getUuid(), new ConcurrentLinkedDeque<>());
         });
 
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             currentPlayerCount = server.getCurrentPlayerCount() - 1;
+
+            teleportRequests.remove(handler.getPlayer().getUuid());
+            lastPlayerPositions.remove(handler.getPlayer().getUuid());
         });
 
         PlayerActivityEvents.AFK.register((player, server) -> {
