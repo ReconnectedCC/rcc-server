@@ -1,8 +1,15 @@
 package cc.reconnected.server;
 
-import cc.reconnected.server.commands.*;
+import cc.reconnected.server.commands.home.*;
+import cc.reconnected.server.commands.misc.*;
+import cc.reconnected.server.commands.spawn.*;
+import cc.reconnected.server.commands.teleport.*;
+import cc.reconnected.server.commands.tell.*;
+import cc.reconnected.server.commands.warp.*;
 import cc.reconnected.server.core.*;
+import cc.reconnected.server.data.StateManager;
 import cc.reconnected.server.database.PlayerData;
+import cc.reconnected.server.events.PlayerUsernameChange;
 import cc.reconnected.server.events.PlayerWelcome;
 import cc.reconnected.server.events.Ready;
 import net.fabricmc.api.ModInitializer;
@@ -17,6 +24,7 @@ import net.luckperms.api.LuckPermsProvider;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.WorldSavePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +36,8 @@ public class RccServer implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     public static final cc.reconnected.server.RccServerConfig CONFIG = cc.reconnected.server.RccServerConfig.createAndLoad();
+
+    public static final StateManager state = new StateManager();
 
     private static RccServer INSTANCE;
 
@@ -59,21 +69,40 @@ public class RccServer implements ModInitializer {
     public void onInitialize() {
         LOGGER.info("Starting rcc-server");
 
-        ServerLifecycleEvents.SERVER_STARTING.register(server -> this.adventure = FabricServerAudiences.of(server));
+        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
+            state.register(server.getSavePath(WorldSavePath.ROOT).resolve("data").resolve(RccServer.MOD_ID));
+            this.adventure = FabricServerAudiences.of(server);
+        });
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> this.adventure = null);
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             RccCommand.register(dispatcher, registryAccess, environment);
+
             AfkCommand.register(dispatcher, registryAccess, environment);
+
             TellCommand.register(dispatcher, registryAccess, environment);
             ReplyCommand.register(dispatcher, registryAccess, environment);
+
             TeleportAskCommand.register(dispatcher, registryAccess, environment);
             TeleportAskHereCommand.register(dispatcher, registryAccess, environment);
             TeleportAcceptCommand.register(dispatcher, registryAccess, environment);
             TeleportDenyCommand.register(dispatcher, registryAccess, environment);
+
             BackCommand.register(dispatcher, registryAccess, environment);
+
             FlyCommand.register(dispatcher, registryAccess, environment);
             GodCommand.register(dispatcher, registryAccess, environment);
+
+            SetSpawnCommand.register(dispatcher, registryAccess, environment);
+            SpawnCommand.register(dispatcher, registryAccess, environment);
+
+            HomeCommand.register(dispatcher, registryAccess, environment);
+            SetHomeCommand.register(dispatcher, registryAccess, environment);
+            DeleteHomeCommand.register(dispatcher, registryAccess, environment);
+
+            WarpCommand.register(dispatcher, registryAccess, environment);
+            SetWarpCommand.register(dispatcher, registryAccess, environment);
+            DeleteWarpCommand.register(dispatcher, registryAccess, environment);
         });
 
         AfkTracker.register();
@@ -89,25 +118,32 @@ public class RccServer implements ModInitializer {
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             var player = handler.getPlayer();
-            var playerData = PlayerData.getPlayer(player.getUuid());
-            playerData.set(PlayerData.KEYS.username, player.getName().getString());
-            var firstJoinedDate = playerData.getDate(PlayerData.KEYS.firstJoinedDate);
-            boolean isNewPlayer = false;
-            if (firstJoinedDate == null) {
-                playerData.setDate(PlayerData.KEYS.firstJoinedDate, new Date());
-                isNewPlayer = true;
-            }
-            if (isNewPlayer) {
-                PlayerWelcome.PLAYER_WELCOME.invoker().playerWelcome(player, playerData, server);
-                LOGGER.info("Player {} joined for the first time!", player.getName().getString());
-            }
-        });
-    }
 
-    public void broadcastMessage(MinecraftServer server, Text message) {
-        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            player.sendMessage(message, false);
-        }
+            var playerState = state.getPlayerState(player.getUuid());
+            var playerData = PlayerData.getPlayer(player.getUuid());
+
+            if (playerState.firstJoinedDate == null) {
+                LOGGER.info("Player {} joined for the first time!", player.getGameProfile().getName());
+                playerState.firstJoinedDate = new Date();
+                PlayerWelcome.PLAYER_WELCOME.invoker().playerWelcome(player, server);
+                var serverState = state.getServerState();
+                var spawnPosition = serverState.spawn;
+
+                if (spawnPosition != null) {
+                    spawnPosition.teleport(player, false);
+                }
+
+                playerData.setDate(PlayerData.KEYS.firstJoinedDate, new Date());
+            }
+
+            if (playerState.username != null && !playerState.username.equals(player.getGameProfile().getName())) {
+                LOGGER.info("Player {} has changed their username from {}", player.getGameProfile().getName(), playerState.username);
+                PlayerUsernameChange.PLAYER_USERNAME_CHANGE.invoker().changeUsername(player, playerState.username);
+                playerData.set(PlayerData.KEYS.username, player.getName().getString());
+            }
+            playerState.username = player.getGameProfile().getName();
+            state.savePlayerState(player.getUuid(), playerState);
+        });
     }
 
     public void broadcastMessage(MinecraftServer server, Component message) {

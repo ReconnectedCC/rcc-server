@@ -1,6 +1,7 @@
-package cc.reconnected.server.commands;
+package cc.reconnected.server.commands.teleport;
 
 import cc.reconnected.server.core.TeleportTracker;
+import cc.reconnected.server.util.Components;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -60,9 +61,9 @@ public class TeleportAskCommand {
                 .appendSpace()
                 .append(Component.text("requested to teleport to you.", NamedTextColor.GOLD))
                 .appendNewline().appendSpace()
-                .append(TeleportTracker.makeButton(Component.text("Accept", NamedTextColor.GREEN), Component.text("Click to accept request"), "/tpaccept " + request.requestId))
+                .append(Components.makeButton(Component.text("Accept", NamedTextColor.GREEN), Component.text("Click to accept request"), "/tpaccept " + request.requestId))
                 .appendSpace()
-                .append(TeleportTracker.makeButton(Component.text("Refuse", NamedTextColor.RED), Component.text("Click to refuse request"), "/tpdeny " + request.requestId));
+                .append(Components.makeButton(Component.text("Refuse", NamedTextColor.RED), Component.text("Click to refuse request"), "/tpdeny " + request.requestId));
 
         target.sendMessage(requestMessage);
 

@@ -28,4 +28,6 @@ public class RccServerConfigModel {
     public ArrayList<String> tabFooter = new ArrayList<>(List.of(
             "<gradient:#DEDE6C:#CC4C4C:{phase}><st>                                  </st></gradient>"
     ));
+
+    public String playerTabName = "%player:displayname_visual% %player:playtime%";
 }

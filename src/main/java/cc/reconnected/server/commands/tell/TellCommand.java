@@ -1,4 +1,4 @@
-package cc.reconnected.server.commands;
+package cc.reconnected.server.commands.tell;
 
 import cc.reconnected.server.RccServer;
 import cc.reconnected.server.parser.MarkdownParser;
@@ -6,6 +6,9 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import me.lucko.fabric.api.permissions.v0.Permissions;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.minecraft.command.CommandRegistryAccess;
@@ -67,6 +70,17 @@ public class TellCommand {
         }
 
         var parsedMessage = MarkdownParser.defaultParser.parseNode(message);
+        var you = Component.text("You", NamedTextColor.GRAY, TextDecoration.ITALIC);
+        var sourceText = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.tellMessage(),
+                Placeholder.component("source", you),
+                Placeholder.component("target", targetDisplayName),
+                Placeholder.component("message", parsedMessage.toText()));
+
+        var targetText = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.tellMessage(),
+                Placeholder.component("source", source.getDisplayName()),
+                Placeholder.component("target", you),
+                Placeholder.component("message", parsedMessage.toText()));
+
         var text = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.tellMessage(),
                 Placeholder.component("source", source.getDisplayName()),
                 Placeholder.component("target", targetDisplayName),
@@ -76,16 +90,16 @@ public class TellCommand {
         lastSender.put(source.getName(), targetName);
 
         if (!source.getName().equals(targetName)) {
-            source.sendMessage(text);
+            source.sendMessage(sourceText);
         }
         if (targetPlayer != null) {
-            targetPlayer.sendMessage(text);
+            targetPlayer.sendMessage(targetText);
             if (source.isExecutedByPlayer()) {
                 source.getServer().sendMessage(text);
             }
         } else {
             // avoid duped message
-            source.getServer().sendMessage(text);
+            source.getServer().sendMessage(targetText);
         }
 
         var lp = RccServer.getInstance().luckPerms();
@@ -103,7 +117,6 @@ public class TellCommand {
             if (playerPerms.checkPermission("rcc.tell.spy").asBoolean()) {
                 player.sendMessage(spyText);
             }
-            ;
         });
     }
 }

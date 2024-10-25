@@ -1,7 +1,6 @@
 package cc.reconnected.server.core;
 
 import cc.reconnected.server.RccServer;
-import cc.reconnected.server.data.StateSaverAndLoader;
 import cc.reconnected.server.events.PlayerActivityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.*;
@@ -16,16 +15,17 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 
-import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AfkTracker {
     private static final int cycleDelay = 1;
     private static final int absentTimeTrigger = RccServer.CONFIG.afkTimeTrigger() * 20; // seconds * 20 ticks
 
-    private final HashMap<UUID, PlayerState> playerStates = new HashMap<>();
+    private final ConcurrentHashMap<UUID, PlayerActivityState> playerActivityStates = new ConcurrentHashMap<>();
 
     private static final AfkTracker instance = new AfkTracker();
+
     public static AfkTracker getInstance() {
         return instance;
     }
@@ -63,20 +63,16 @@ public class AfkTracker {
     }
 
     private AfkTracker() {
-        ServerTickEvents.END_SERVER_TICK.register(server -> {
-            if (server.getTicks() % cycleDelay == 0) {
-                updatePlayers(server);
-            }
-        });
+        ServerTickEvents.END_SERVER_TICK.register(this::updatePlayers);
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             final var player = handler.getPlayer();
-            playerStates.put(player.getUuid(), new PlayerState(player, server.getTicks()));
+            playerActivityStates.put(player.getUuid(), new PlayerActivityState(player, server.getTicks()));
         });
 
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             updatePlayerActiveTime(handler.getPlayer(), server.getTicks());
-            playerStates.remove(handler.getPlayer().getUuid());
+            playerActivityStates.remove(handler.getPlayer().getUuid());
 
             // sync to LP
             //var activeTime = String.valueOf(getActiveTime(handler.getPlayer()));
@@ -125,7 +121,7 @@ public class AfkTracker {
 
     private void updatePlayer(ServerPlayerEntity player, MinecraftServer server) {
         var currentTick = server.getTicks();
-        var playerState = playerStates.computeIfAbsent(player.getUuid(), uuid -> new PlayerState(player, currentTick));
+        var playerState = playerActivityStates.computeIfAbsent(player.getUuid(), uuid -> new PlayerActivityState(player, currentTick));
 
         var oldPosition = playerState.position;
         var newPosition = new PlayerPosition(player);
@@ -147,11 +143,11 @@ public class AfkTracker {
     }
 
     private void updatePlayerActiveTime(ServerPlayerEntity player, int currentTick) {
-        var playerState = playerStates.get(player.getUuid());
-        if (!playerState.isAfk) {
-            var worldPlayerData = StateSaverAndLoader.getPlayerState(player);
-            var interval = currentTick - playerState.activeStart;
-            worldPlayerData.activeTime += interval / 20;
+        var playerActivityState = playerActivityStates.get(player.getUuid());
+        if (!playerActivityState.isAfk) {
+            var playerState = RccServer.state.getPlayerState(player.getUuid());
+            var interval = currentTick - playerActivityState.activeStart;
+            playerState.activeTime += interval / 20;
         }
     }
 
@@ -163,10 +159,10 @@ public class AfkTracker {
     }
 
     private void resetAfkState(ServerPlayerEntity player, MinecraftServer server) {
-        if (!playerStates.containsKey(player.getUuid()))
+        if (!playerActivityStates.containsKey(player.getUuid()))
             return;
 
-        var playerState = playerStates.get(player.getUuid());
+        var playerState = playerActivityStates.get(player.getUuid());
         playerState.lastUpdate = server.getTicks();
         if (playerState.isAfk) {
             playerState.isAfk = false;
@@ -200,13 +196,13 @@ public class AfkTracker {
         }
     }
 
-    public static class PlayerState {
+    public static class PlayerActivityState {
         public PlayerPosition position;
         public int lastUpdate;
         public boolean isAfk;
         public int activeStart;
 
-        public PlayerState(ServerPlayerEntity player, int lastUpdate) {
+        public PlayerActivityState(ServerPlayerEntity player, int lastUpdate) {
             this.position = new PlayerPosition(player);
             this.lastUpdate = lastUpdate;
             this.isAfk = false;
@@ -215,21 +211,21 @@ public class AfkTracker {
     }
 
     public boolean isPlayerAfk(UUID playerUuid) {
-        if (!playerStates.containsKey(playerUuid)) {
+        if (!playerActivityStates.containsKey(playerUuid)) {
             return false;
         }
-        return playerStates.get(playerUuid).isAfk;
+        return playerActivityStates.get(playerUuid).isAfk;
     }
 
     public void setPlayerAfk(ServerPlayerEntity player, boolean afk) {
-        if (!playerStates.containsKey(player.getUuid())) {
+        if (!playerActivityStates.containsKey(player.getUuid())) {
             return;
         }
 
         var server = player.getWorld().getServer();
 
         if (afk) {
-            playerStates.get(player.getUuid()).lastUpdate = -absentTimeTrigger - 20; // just to be sure
+            playerActivityStates.get(player.getUuid()).lastUpdate = -absentTimeTrigger - 20; // just to be sure
         } else {
             resetAfkState(player, server);
         }
@@ -238,7 +234,7 @@ public class AfkTracker {
     }
 
     public int getActiveTime(ServerPlayerEntity player) {
-        var worldPlayerData = StateSaverAndLoader.getPlayerState(player);
-        return worldPlayerData.activeTime;
+        var playerState = RccServer.state.getPlayerState(player.getUuid());
+        return playerState.activeTime;
     }
 }

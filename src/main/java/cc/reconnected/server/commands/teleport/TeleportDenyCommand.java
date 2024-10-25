@@ -1,4 +1,4 @@
-package cc.reconnected.server.commands;
+package cc.reconnected.server.commands.teleport;
 
 import cc.reconnected.server.core.TeleportTracker;
 import com.mojang.brigadier.CommandDispatcher;
@@ -7,15 +7,17 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.UuidArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import static net.minecraft.server.command.CommandManager.*;
+import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
 
-public class TeleportAcceptCommand {
+public class TeleportDenyCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-        var node = dispatcher.register(literal("tpaccept")
+        var node = dispatcher.register(literal("tpdeny")
                 .executes(context -> {
                     if (!context.getSource().isExecutedByPlayer()) {
                         context.getSource().sendFeedback(() -> Text.of("This command can only be executed by players!"), false);
@@ -24,7 +26,6 @@ public class TeleportAcceptCommand {
 
                     var playerUuid = context.getSource().getPlayer().getUuid();
                     var playerRequests = TeleportTracker.teleportRequests.get(playerUuid);
-
 
                     var request = playerRequests.pollLast();
 
@@ -59,7 +60,8 @@ public class TeleportAcceptCommand {
                             return 1;
                         })));
 
-        dispatcher.register(literal("tpyes").redirect(node));
+        dispatcher.register(literal("tpno").redirect(node));
+        dispatcher.register(literal("tprefuse").redirect(node));
     }
 
     private static void execute(CommandContext<ServerCommandSource> context, TeleportTracker.TeleportRequest request) {
@@ -70,24 +72,16 @@ public class TeleportAcceptCommand {
 
         var playerManager = context.getSource().getServer().getPlayerManager();
 
-        var sourcePlayer = playerManager.getPlayer(request.player);
-        var targetPlayer = playerManager.getPlayer(request.target);
-
-        if (sourcePlayer == null || targetPlayer == null) {
-            context.getSource().sendFeedback(() -> Text.literal("The other player is no longer available.").formatted(Formatting.RED), false);
-            return;
-        }
-
+        ServerPlayerEntity otherPlayer = null;
         if (player.getUuid().equals(request.target)) {
-            // accepted a tpa from other to self
-            context.getSource().sendFeedback(() -> Text.literal("Teleport request accepted.").formatted(Formatting.GREEN), false);
-            sourcePlayer.sendMessage(Text.literal("Teleporting...").formatted(Formatting.GOLD), false);
-        } else {
-            // accepted a tpa from self to other
-            context.getSource().sendFeedback(() -> Text.literal("Teleporting...").formatted(Formatting.GOLD), false);
-            targetPlayer.sendMessage(Text.empty().append(player.getDisplayName()).append(Text.literal(" accepted your teleport request.").formatted(Formatting.GREEN)), false);
+            otherPlayer = playerManager.getPlayer(request.player);
+        } else if (player.getUuid().equals(request.player)) {
+            otherPlayer = playerManager.getPlayer(request.target);
         }
 
-        TeleportTracker.teleport(sourcePlayer, targetPlayer);
+        if (otherPlayer != null) {
+            otherPlayer.sendMessage(Text.empty().append(player.getDisplayName()).append(Text.literal(" denied your teleport request.").formatted(Formatting.RED)));
+        }
+        context.getSource().sendFeedback(() -> Text.literal("You denied the teleport request.").formatted(Formatting.GOLD), false);
     }
 }

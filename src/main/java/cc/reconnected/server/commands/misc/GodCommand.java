@@ -1,4 +1,4 @@
-package cc.reconnected.server.commands;
+package cc.reconnected.server.commands.misc;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;

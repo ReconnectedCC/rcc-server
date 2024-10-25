@@ -14,7 +14,7 @@ public class BackTracker {
 
     public static void register() {
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-            BackTracker.lastPlayerPositions.remove(handler.getPlayer().getUuid());
+            lastPlayerPositions.remove(handler.getPlayer().getUuid());
         });
 
         PlayerTeleport.EVENT.register((player, origin, destination) -> {

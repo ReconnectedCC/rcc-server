@@ -3,10 +3,13 @@
   "minVersion": "0.8",
   "package": "cc.reconnected.server.mixin",
   "compatibilityLevel": "JAVA_17",
-  "mixins": [],
+  "mixins": [
+    "ServerPlayNetworkManagerMixin"
+  ],
   "client": [],
   "server": [
-    "MessageCommandMixin"
+    "MessageCommandMixin",
+    "ServerPlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

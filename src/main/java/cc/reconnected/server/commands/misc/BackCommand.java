@@ -1,4 +1,4 @@
-package cc.reconnected.server.commands;
+package cc.reconnected.server.commands.misc;
 
 import cc.reconnected.server.core.BackTracker;
 import com.mojang.brigadier.CommandDispatcher;

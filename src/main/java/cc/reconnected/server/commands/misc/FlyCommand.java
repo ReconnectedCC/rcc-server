@@ -1,8 +1,6 @@
-package cc.reconnected.server.commands;
+package cc.reconnected.server.commands.misc;
 
-import cc.reconnected.server.RccServer;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.CommandRegistryAccess;

@@ -1,13 +1,12 @@
 package cc.reconnected.server.core;
 
 import cc.reconnected.server.RccServer;
+import cc.reconnected.server.util.Components;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.Placeholders;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
-import net.minecraft.text.Text;
 
 public class TabList {
     public static void register() {
@@ -42,8 +41,8 @@ public class TabList {
                     footerComponent = footerComponent.append(minimessage.deserialize(line));
                 }
 
-                var parsedHeader = Placeholders.parseText(toText(headerComponent), playerContext);
-                var parsedFooter = Placeholders.parseText(toText(footerComponent), playerContext);
+                var parsedHeader = Placeholders.parseText(Components.toText(headerComponent), playerContext);
+                var parsedFooter = Placeholders.parseText(Components.toText(footerComponent), playerContext);
 
                 var audience = RccServer.getInstance().adventure().player(player.getUuid());
                 audience.sendPlayerListHeaderAndFooter(parsedHeader, parsedFooter);
@@ -52,8 +51,4 @@ public class TabList {
 
     }
 
-    public static Text toText(Component component) {
-        var json = JSONComponentSerializer.json().serialize(component);
-        return Text.Serializer.fromJson(json);
-    }
 }
