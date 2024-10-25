@@ -2,6 +2,9 @@ package cc.reconnected.server;
 
 import io.wispforest.owo.config.annotation.Config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Config(name = "rcc-server-config", wrapperName = "RccServerConfig")
 public class RccServerConfigModel {
     public boolean enableHttpApi = true;
@@ -16,4 +19,13 @@ public class RccServerConfigModel {
     public String tellMessageSpy = "\uD83D\uDC41 <gray>[<source> → <target>]</gray> <message>";
 
     public int teleportRequestTimeout = 120;
+
+    public boolean enableTabList = true;
+    public ArrayList<String> tabHeader = new ArrayList<>(List.of(
+            "<gradient:#DEDE6C:#CC4C4C:{phase}><st>                                  </st></gradient>"
+    ));
+
+    public ArrayList<String> tabFooter = new ArrayList<>(List.of(
+            "<gradient:#DEDE6C:#CC4C4C:{phase}><st>                                  </st></gradient>"
+    ));
 }

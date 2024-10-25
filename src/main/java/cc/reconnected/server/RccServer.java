@@ -7,6 +7,7 @@ import cc.reconnected.server.events.PlayerWelcome;
 import cc.reconnected.server.events.Ready;
 import cc.reconnected.server.http.ServiceServer;
 import cc.reconnected.server.struct.ServerPosition;
+import cc.reconnected.server.tablist.TabList;
 import cc.reconnected.server.trackers.AfkTracker;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -14,6 +15,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -84,6 +86,16 @@ public class RccServer implements ModInitializer {
         INSTANCE = this;
     }
 
+    private volatile FabricServerAudiences adventure;
+
+    public FabricServerAudiences adventure() {
+        FabricServerAudiences ret = this.adventure;
+        if (ret == null) {
+            throw new IllegalStateException("Tried to access Adventure without a running server!");
+        }
+        return ret;
+    }
+
     public static final ConcurrentHashMap<UUID, ConcurrentLinkedDeque<TeleportAskCommand.TeleportRequest>> teleportRequests = new ConcurrentHashMap<>();
     public static final ConcurrentHashMap<UUID, ServerPosition> lastPlayerPositions = new ConcurrentHashMap<>();
 
@@ -91,7 +103,11 @@ public class RccServer implements ModInitializer {
     public void onInitialize() {
         LOGGER.info("Starting rcc-server");
 
+        ServerLifecycleEvents.SERVER_STARTING.register(server -> this.adventure = FabricServerAudiences.of(server));
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> this.adventure = null);
+
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            RccCommand.register(dispatcher, registryAccess, environment);
             AfkCommand.register(dispatcher, registryAccess, environment);
             TellCommand.register(dispatcher, registryAccess, environment);
             ReplyCommand.register(dispatcher, registryAccess, environment);
@@ -103,6 +119,8 @@ public class RccServer implements ModInitializer {
             FlyCommand.register(dispatcher, registryAccess, environment);
             GodCommand.register(dispatcher, registryAccess, environment);
         });
+
+        TabList.register();
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             luckPerms = LuckPermsProvider.get();
