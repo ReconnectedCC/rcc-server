@@ -2,8 +2,9 @@ package cc.reconnected.server.core;
 
 import cc.reconnected.server.events.PlayerTeleport;
 import cc.reconnected.server.struct.ServerPosition;
-import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,8 +21,11 @@ public class BackTracker {
             lastPlayerPositions.put(player.getUuid(), origin);
         });
 
-        ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
-            lastPlayerPositions.put(oldPlayer.getUuid(), new ServerPosition(oldPlayer));
+        ServerLivingEntityEvents.AFTER_DEATH.register((entity, damageSource) -> {
+            if (entity.isPlayer()) {
+                var player = (ServerPlayerEntity) entity;
+                lastPlayerPositions.put(entity.getUuid(), new ServerPosition(player));
+            }
         });
     }
 }
