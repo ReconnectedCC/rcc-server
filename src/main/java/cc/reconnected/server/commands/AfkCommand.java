@@ -1,6 +1,6 @@
 package cc.reconnected.server.commands;
 
-import cc.reconnected.server.RccServer;
+import cc.reconnected.server.core.AfkTracker;
 import com.mojang.brigadier.CommandDispatcher;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.CommandRegistryAccess;
@@ -22,7 +22,7 @@ public class AfkCommand {
                     }
 
                     var player = context.getSource().getPlayer();
-                    RccServer.getInstance().setPlayerAfk(player, true);
+                    AfkTracker.getInstance().setPlayerAfk(player, true);
 
                     return 1;
                 });

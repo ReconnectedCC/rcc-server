@@ -1,6 +1,6 @@
 package cc.reconnected.server.commands;
 
-import cc.reconnected.server.RccServer;
+import cc.reconnected.server.core.TeleportTracker;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandRegistryAccess;
@@ -23,7 +23,7 @@ public class TeleportAcceptCommand {
                     }
 
                     var playerUuid = context.getSource().getPlayer().getUuid();
-                    var playerRequests = RccServer.teleportRequests.get(playerUuid);
+                    var playerRequests = TeleportTracker.teleportRequests.get(playerUuid);
 
 
                     var request = playerRequests.pollLast();
@@ -46,7 +46,7 @@ public class TeleportAcceptCommand {
 
                             var uuid = UuidArgumentType.getUuid(context, "uuid");
                             var playerUuid = context.getSource().getPlayer().getUuid();
-                            var playerRequests = RccServer.teleportRequests.get(playerUuid);
+                            var playerRequests = TeleportTracker.teleportRequests.get(playerUuid);
 
                             var request = playerRequests.stream().filter(req -> req.requestId.equals(uuid)).findFirst().orElse(null);
                             if (request == null) {
@@ -62,7 +62,7 @@ public class TeleportAcceptCommand {
         dispatcher.register(literal("tpyes").redirect(node));
     }
 
-    private static void execute(CommandContext<ServerCommandSource> context, TeleportAskCommand.TeleportRequest request) {
+    private static void execute(CommandContext<ServerCommandSource> context, TeleportTracker.TeleportRequest request) {
         var source = context.getSource();
         request.expire();
 
@@ -88,6 +88,6 @@ public class TeleportAcceptCommand {
             targetPlayer.sendMessage(Text.empty().append(player.getDisplayName()).append(Text.literal(" accepted your teleport request.").formatted(Formatting.GREEN)), false);
         }
 
-        TeleportAskCommand.teleport(sourcePlayer, targetPlayer);
+        TeleportTracker.teleport(sourcePlayer, targetPlayer);
     }
 }

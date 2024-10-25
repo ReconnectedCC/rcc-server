@@ -1,6 +1,6 @@
 package cc.reconnected.server.struct;
 
-import cc.reconnected.server.RccServer;
+import cc.reconnected.server.core.BackTracker;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 
@@ -32,7 +32,7 @@ public class ServerPosition {
 
     public void teleport(ServerPlayerEntity player) {
         var currentPosition = new ServerPosition(player);
-        RccServer.lastPlayerPositions.put(player.getUuid(), currentPosition);
+        BackTracker.lastPlayerPositions.put(player.getUuid(), currentPosition);
 
         player.teleport(
                 this.world,

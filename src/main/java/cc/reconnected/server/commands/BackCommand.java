@@ -1,6 +1,6 @@
 package cc.reconnected.server.commands;
 
-import cc.reconnected.server.RccServer;
+import cc.reconnected.server.core.BackTracker;
 import com.mojang.brigadier.CommandDispatcher;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.CommandRegistryAccess;
@@ -23,7 +23,7 @@ public class BackCommand {
 
                     var player = context.getSource().getPlayer();
 
-                    var lastPosition = RccServer.lastPlayerPositions.get(player.getUuid());
+                    var lastPosition = BackTracker.lastPlayerPositions.get(player.getUuid());
                     if (lastPosition == null) {
                         context.getSource().sendFeedback(() -> Text.literal("There is no position to return back to.").formatted(Formatting.RED), false);
                         return 1;

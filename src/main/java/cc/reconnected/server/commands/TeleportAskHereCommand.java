@@ -1,6 +1,6 @@
 package cc.reconnected.server.commands;
 
-import cc.reconnected.server.RccServer;
+import cc.reconnected.server.core.TeleportTracker;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -52,8 +52,8 @@ public class TeleportAskHereCommand {
             return;
         }
 
-        var request = new TeleportAskCommand.TeleportRequest(target.getUuid(), player.getUuid());
-        var targetRequests = RccServer.teleportRequests.get(target.getUuid());
+        var request = new TeleportTracker.TeleportRequest(target.getUuid(), player.getUuid());
+        var targetRequests = TeleportTracker.teleportRequests.get(target.getUuid());
         targetRequests.addLast(request);
 
         var requestMessage = Component.empty()
@@ -61,9 +61,9 @@ public class TeleportAskHereCommand {
                 .appendSpace()
                 .append(Component.text("requested you to teleport to them.", NamedTextColor.GOLD))
                 .appendNewline().appendSpace()
-                .append(TeleportAskCommand.makeButton(Component.text("Accept", NamedTextColor.GREEN), Component.text("Click to accept request"), "/tpaccept " + request.requestId))
+                .append(TeleportTracker.makeButton(Component.text("Accept", NamedTextColor.GREEN), Component.text("Click to accept request"), "/tpaccept " + request.requestId))
                 .appendSpace()
-                .append(TeleportAskCommand.makeButton(Component.text("Refuse", NamedTextColor.RED), Component.text("Click to refuse request"), "/tpdeny " + request.requestId));
+                .append(TeleportTracker.makeButton(Component.text("Refuse", NamedTextColor.RED), Component.text("Click to refuse request"), "/tpdeny " + request.requestId));
 
         target.sendMessage(requestMessage);
 

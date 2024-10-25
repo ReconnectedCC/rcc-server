@@ -1,4 +1,4 @@
-package cc.reconnected.server.tablist;
+package cc.reconnected.server.core;
 
 import cc.reconnected.server.RccServer;
 import eu.pb4.placeholders.api.PlaceholderContext;

@@ -1,6 +1,6 @@
 package cc.reconnected.server.commands;
 
-import cc.reconnected.server.RccServer;
+import cc.reconnected.server.core.TeleportTracker;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandRegistryAccess;
@@ -25,7 +25,7 @@ public class TeleportDenyCommand {
                     }
 
                     var playerUuid = context.getSource().getPlayer().getUuid();
-                    var playerRequests = RccServer.teleportRequests.get(playerUuid);
+                    var playerRequests = TeleportTracker.teleportRequests.get(playerUuid);
 
                     var request = playerRequests.pollLast();
 
@@ -47,7 +47,7 @@ public class TeleportDenyCommand {
 
                             var uuid = UuidArgumentType.getUuid(context, "uuid");
                             var playerUuid = context.getSource().getPlayer().getUuid();
-                            var playerRequests = RccServer.teleportRequests.get(playerUuid);
+                            var playerRequests = TeleportTracker.teleportRequests.get(playerUuid);
 
                             var request = playerRequests.stream().filter(req -> req.requestId.equals(uuid)).findFirst().orElse(null);
                             if (request == null) {
@@ -64,7 +64,7 @@ public class TeleportDenyCommand {
         dispatcher.register(literal("tprefuse").redirect(node));
     }
 
-    private static void execute(CommandContext<ServerCommandSource> context, TeleportAskCommand.TeleportRequest request) {
+    private static void execute(CommandContext<ServerCommandSource> context, TeleportTracker.TeleportRequest request) {
         var source = context.getSource();
         request.expire();
 

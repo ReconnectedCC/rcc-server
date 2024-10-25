@@ -1,15 +1,18 @@
-package cc.reconnected.server.trackers;
+package cc.reconnected.server.core;
 
 import cc.reconnected.server.RccServer;
 import cc.reconnected.server.data.StateSaverAndLoader;
-import cc.reconnected.server.database.PlayerData;
 import cc.reconnected.server.events.PlayerActivityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 
@@ -22,7 +25,44 @@ public class AfkTracker {
 
     private final HashMap<UUID, PlayerState> playerStates = new HashMap<>();
 
-    public AfkTracker() {
+    private static final AfkTracker instance = new AfkTracker();
+    public static AfkTracker getInstance() {
+        return instance;
+    }
+
+    public static void register() {
+        PlayerActivityEvents.AFK.register((player, server) -> {
+            RccServer.LOGGER.info("{} is AFK. Active time: {} seconds.", player.getGameProfile().getName(), getInstance().getActiveTime(player));
+
+            var displayNameJson = Text.Serializer.toJson(player.getDisplayName());
+            var displayName = JSONComponentSerializer.json().deserialize(displayNameJson);
+
+            var message = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.afkMessage(),
+                    Placeholder.component("displayname", displayName),
+                    Placeholder.unparsed("username", player.getGameProfile().getName()),
+                    Placeholder.unparsed("uuid", player.getUuid().toString())
+            );
+
+            RccServer.getInstance().broadcastMessage(server, message);
+        });
+
+        PlayerActivityEvents.AFK_RETURN.register((player, server) -> {
+            RccServer.LOGGER.info("{} is no longer AFK. Active time: {} seconds.", player.getGameProfile().getName(), getInstance().getActiveTime(player));
+
+            var displayNameJson = Text.Serializer.toJson(player.getDisplayName());
+            var displayName = JSONComponentSerializer.json().deserialize(displayNameJson);
+
+            var message = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.afkReturnMessage(),
+                    Placeholder.component("displayname", displayName),
+                    Placeholder.unparsed("username", player.getGameProfile().getName()),
+                    Placeholder.unparsed("uuid", player.getUuid().toString())
+            );
+
+            RccServer.getInstance().broadcastMessage(server, message);
+        });
+    }
+
+    private AfkTracker() {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             if (server.getTicks() % cycleDelay == 0) {
                 updatePlayers(server);
@@ -82,7 +122,6 @@ public class AfkTracker {
             return true;
         });
     }
-
 
     private void updatePlayer(ServerPlayerEntity player, MinecraftServer server) {
         var currentTick = server.getTicks();
@@ -202,5 +241,4 @@ public class AfkTracker {
         var worldPlayerData = StateSaverAndLoader.getPlayerState(player);
         return worldPlayerData.activeTime;
     }
-
 }
