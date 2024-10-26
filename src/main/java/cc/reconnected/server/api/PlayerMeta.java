@@ -1,4 +1,4 @@
-package cc.reconnected.server.database;
+package cc.reconnected.server.api;
 
 import cc.reconnected.server.RccServer;
 import net.luckperms.api.LuckPerms;
@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class PlayerData {
+public class PlayerMeta {
     public static final String nodePrefix = "rcc";
 
     private static LuckPerms luckPerms() {
@@ -43,7 +43,7 @@ public class PlayerData {
     private Set<MetaNode> rawNodes;
     private Map<String, String> nodes;
 
-    private PlayerData(UUID uuid, User lpUser) {
+    private PlayerMeta(UUID uuid, User lpUser) {
         this.uuid = uuid;
         this.lpUser = lpUser;
 
@@ -146,7 +146,7 @@ public class PlayerData {
         return lpUser.getPrimaryGroup();
     }
 
-    public static PlayerData getPlayer(UUID uuid) {
+    public static PlayerMeta getPlayer(UUID uuid) {
         var lp = luckPerms();
         var userManager = lp.getUserManager();
 
@@ -154,14 +154,14 @@ public class PlayerData {
         // TODO: ouch, not good...
         var lpUser = userFuture.join();
 
-        var playerData = new PlayerData(uuid, lpUser);
+        var playerData = new PlayerMeta(uuid, lpUser);
         playerData.name = lpUser.getUsername();
         return playerData;
     }
 
-    public static PlayerData getPlayer(ServerPlayerEntity player) {
+    public static PlayerMeta getPlayer(ServerPlayerEntity player) {
         var user = luckPerms().getPlayerAdapter(ServerPlayerEntity.class).getUser(player);
-        var playerData = new PlayerData(player.getUuid(), user);
+        var playerData = new PlayerMeta(player.getUuid(), user);
         playerData.name = player.getEntityName();
         return playerData;
     }

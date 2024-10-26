@@ -1,6 +1,6 @@
 package cc.reconnected.server.core;
 
-import cc.reconnected.server.events.PlayerTeleport;
+import cc.reconnected.server.api.events.PlayerTeleport;
 import cc.reconnected.server.struct.ServerPosition;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;

@@ -8,10 +8,9 @@ import cc.reconnected.server.commands.tell.*;
 import cc.reconnected.server.commands.warp.*;
 import cc.reconnected.server.core.*;
 import cc.reconnected.server.data.StateManager;
-import cc.reconnected.server.database.PlayerData;
-import cc.reconnected.server.events.PlayerUsernameChange;
-import cc.reconnected.server.events.PlayerWelcome;
-import cc.reconnected.server.events.Ready;
+import cc.reconnected.server.api.events.PlayerUsernameChange;
+import cc.reconnected.server.api.events.PlayerWelcome;
+import cc.reconnected.server.api.events.Ready;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -23,7 +22,6 @@ import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
 import net.minecraft.util.WorldSavePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,9 +116,7 @@ public class RccServer implements ModInitializer {
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             var player = handler.getPlayer();
-
             var playerState = state.getPlayerState(player.getUuid());
-            var playerData = PlayerData.getPlayer(player.getUuid());
 
             if (playerState.firstJoinedDate == null) {
                 LOGGER.info("Player {} joined for the first time!", player.getGameProfile().getName());
@@ -132,14 +128,11 @@ public class RccServer implements ModInitializer {
                 if (spawnPosition != null) {
                     spawnPosition.teleport(player, false);
                 }
-
-                playerData.setDate(PlayerData.KEYS.firstJoinedDate, new Date());
             }
 
             if (playerState.username != null && !playerState.username.equals(player.getGameProfile().getName())) {
                 LOGGER.info("Player {} has changed their username from {}", player.getGameProfile().getName(), playerState.username);
                 PlayerUsernameChange.PLAYER_USERNAME_CHANGE.invoker().changeUsername(player, playerState.username);
-                playerData.set(PlayerData.KEYS.username, player.getName().getString());
             }
             playerState.username = player.getGameProfile().getName();
             state.savePlayerState(player.getUuid(), playerState);

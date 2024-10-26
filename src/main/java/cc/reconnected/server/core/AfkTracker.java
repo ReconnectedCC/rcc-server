@@ -1,7 +1,7 @@
 package cc.reconnected.server.core;
 
 import cc.reconnected.server.RccServer;
-import cc.reconnected.server.events.PlayerActivityEvents;
+import cc.reconnected.server.api.events.PlayerActivityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;

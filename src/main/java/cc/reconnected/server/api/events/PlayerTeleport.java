@@ -1,4 +1,4 @@
-package cc.reconnected.server.events;
+package cc.reconnected.server.api.events;
 
 import cc.reconnected.server.struct.ServerPosition;
 import net.fabricmc.fabric.api.event.Event;
