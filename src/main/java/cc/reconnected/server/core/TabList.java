@@ -13,40 +13,44 @@ public class TabList {
         if (!RccServer.CONFIG.enableTabList())
             return;
 
+        var minimessage = MiniMessage.miniMessage();
+
         ServerTickEvents.END_SERVER_TICK.register(server -> {
-            var phase = (Math.sin((server.getTicks() * Math.PI) / 20) + 1) / 2d;
-            var minimessage = MiniMessage.miniMessage();
+            if(server.getTicks() % RccServer.CONFIG.tabListTickDelay() == 0) {
 
-            server.getPlayerManager().getPlayerList().forEach(player -> {
-                var playerContext = PlaceholderContext.of(player);
-                Component headerComponent = Component.empty();
-                for (int i = 0; i < RccServer.CONFIG.tabHeader().size(); i++) {
-                    var line = RccServer.CONFIG.tabHeader().get(i);
-                    line = line.replace("{phase}", String.valueOf(phase));
-                    if (i > 0) {
-                        headerComponent = headerComponent.appendNewline();
+                var phase = (Math.sin((server.getTicks() * Math.PI * 2) / RccServer.CONFIG.tabPhaseFrequency()) + 1) / 2d;
+
+                server.getPlayerManager().getPlayerList().forEach(player -> {
+                    var playerContext = PlaceholderContext.of(player);
+                    Component headerComponent = Component.empty();
+                    for (int i = 0; i < RccServer.CONFIG.tabHeader().size(); i++) {
+                        var line = RccServer.CONFIG.tabHeader().get(i);
+                        line = line.replace("{phase}", String.valueOf(phase));
+                        if (i > 0) {
+                            headerComponent = headerComponent.appendNewline();
+                        }
+
+                        headerComponent = headerComponent.append(minimessage.deserialize(line));
                     }
 
-                    headerComponent = headerComponent.append(minimessage.deserialize(line));
-                }
+                    Component footerComponent = Component.empty();
+                    for (int i = 0; i < RccServer.CONFIG.tabFooter().size(); i++) {
+                        var line = RccServer.CONFIG.tabFooter().get(i);
+                        line = line.replace("{phase}", String.valueOf(phase));
+                        if (i > 0) {
+                            footerComponent = footerComponent.appendNewline();
+                        }
 
-                Component footerComponent = Component.empty();
-                for (int i = 0; i < RccServer.CONFIG.tabFooter().size(); i++) {
-                    var line = RccServer.CONFIG.tabFooter().get(i);
-                    line = line.replace("{phase}", String.valueOf(phase));
-                    if (i > 0) {
-                        footerComponent = footerComponent.appendNewline();
+                        footerComponent = footerComponent.append(minimessage.deserialize(line));
                     }
 
-                    footerComponent = footerComponent.append(minimessage.deserialize(line));
-                }
+                    var parsedHeader = Placeholders.parseText(Components.toText(headerComponent), playerContext);
+                    var parsedFooter = Placeholders.parseText(Components.toText(footerComponent), playerContext);
 
-                var parsedHeader = Placeholders.parseText(Components.toText(headerComponent), playerContext);
-                var parsedFooter = Placeholders.parseText(Components.toText(footerComponent), playerContext);
-
-                var audience = RccServer.getInstance().adventure().player(player.getUuid());
-                audience.sendPlayerListHeaderAndFooter(parsedHeader, parsedFooter);
-            });
+                    var audience = RccServer.getInstance().adventure().player(player.getUuid());
+                    audience.sendPlayerListHeaderAndFooter(parsedHeader, parsedFooter);
+                });
+            }
         });
 
     }

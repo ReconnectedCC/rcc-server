@@ -21,6 +21,8 @@ public class RccServerConfigModel {
     public int teleportRequestTimeout = 120;
 
     public boolean enableTabList = true;
+    public int tabListTickDelay = 2;
+    public double tabPhaseFrequency = 40;
     public ArrayList<String> tabHeader = new ArrayList<>(List.of(
             "<gradient:#DEDE6C:#CC4C4C:{phase}><st>                                  </st></gradient>"
     ));
