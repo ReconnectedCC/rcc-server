@@ -99,6 +99,10 @@ public class RccServer implements ModInitializer {
             WarpCommand.register(dispatcher, registryAccess, environment);
             SetWarpCommand.register(dispatcher, registryAccess, environment);
             DeleteWarpCommand.register(dispatcher, registryAccess, environment);
+
+            TimeBarCommand.register(dispatcher, registryAccess, environment);
+
+            NearCommand.register(dispatcher,  registryAccess, environment);
         });
 
         AfkTracker.register();
@@ -106,6 +110,7 @@ public class RccServer implements ModInitializer {
         BackTracker.register();
         TabList.register();
         HttpApiServer.register();
+        BossBarManager.register();
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             luckPerms = LuckPermsProvider.get();

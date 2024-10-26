@@ -33,4 +33,13 @@ public class RccServerConfigModel {
     ));
 
     public String playerTabName = "%rcc-server:afk%%player:displayname_visual%";
+
+    public int nearCommandMaxRange = 48;
+    public int nearCommandDefaultRange = 32;
+
+    public boolean enableAutoRestart = true;
+    public ArrayList<String> restartAt = new ArrayList<>(List.of(
+            "06:00",
+            "18:00"
+    ));
 }
