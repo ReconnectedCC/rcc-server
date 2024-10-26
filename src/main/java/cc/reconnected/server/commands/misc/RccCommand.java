@@ -1,6 +1,7 @@
 package cc.reconnected.server.commands.misc;
 
 import cc.reconnected.server.RccServer;
+import cc.reconnected.server.api.events.RccEvents;
 import com.mojang.brigadier.CommandDispatcher;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.CommandRegistryAccess;
@@ -25,6 +26,8 @@ public class RccCommand {
                                 context.getSource().sendFeedback(() -> Text.of("Failed to load RCC config. Check console for more info."), true);
                                 return 1;
                             }
+
+                            RccEvents.RELOAD.invoker().onReload(RccServer.getInstance());
 
                             context.getSource().sendFeedback(() -> Text.of("Reloaded RCC config"), true);
 

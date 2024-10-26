@@ -1,6 +1,6 @@
 package cc.reconnected.server.core;
 
-import cc.reconnected.server.api.events.PlayerTeleport;
+import cc.reconnected.server.api.events.PlayerTeleportEvent;
 import cc.reconnected.server.struct.ServerPosition;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -17,7 +17,7 @@ public class BackTracker {
             lastPlayerPositions.remove(handler.getPlayer().getUuid());
         });
 
-        PlayerTeleport.EVENT.register((player, origin, destination) -> {
+        PlayerTeleportEvent.EVENT.register((player, origin, destination) -> {
             lastPlayerPositions.put(player.getUuid(), origin);
         });
 

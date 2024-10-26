@@ -2,6 +2,10 @@ package cc.reconnected.server.core;
 
 import cc.reconnected.server.RccServer;
 import cc.reconnected.server.api.events.PlayerActivityEvents;
+import cc.reconnected.server.api.events.RccEvents;
+import cc.reconnected.server.util.Components;
+import eu.pb4.placeholders.api.PlaceholderResult;
+import eu.pb4.placeholders.api.Placeholders;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
@@ -13,6 +17,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 
 import java.util.UUID;
@@ -30,7 +35,22 @@ public class AfkTracker {
         return instance;
     }
 
+    public static Text afkTag;
+
     public static void register() {
+        loadAfkTag();
+
+        Placeholders.register(new Identifier(RccServer.MOD_ID, "afk"), (context, argument) -> {
+            if(!context.hasPlayer())
+                return PlaceholderResult.invalid("No player!");
+            var player = context.player();
+            if(instance.isPlayerAfk(player.getUuid())) {
+                return PlaceholderResult.value(afkTag);
+            } else {
+                return PlaceholderResult.value("");
+            }
+        });
+
         PlayerActivityEvents.AFK.register((player, server) -> {
             RccServer.LOGGER.info("{} is AFK. Active time: {} seconds.", player.getGameProfile().getName(), getInstance().getActiveTime(player));
 
@@ -60,6 +80,12 @@ public class AfkTracker {
 
             RccServer.getInstance().broadcastMessage(server, message);
         });
+
+        RccEvents.RELOAD.register(inst -> loadAfkTag());
+    }
+
+    private static void loadAfkTag() {
+        afkTag = Components.toText(MiniMessage.miniMessage().deserialize(RccServer.CONFIG.afkTag()));
     }
 
     private AfkTracker() {

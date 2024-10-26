@@ -14,6 +14,7 @@ public class RccServerConfigModel {
 
     public String afkMessage = "<gray><displayname> is now AFK</gray>";
     public String afkReturnMessage = "<gray><displayname> is no longer AFK</gray>";
+    public String afkTag = "<gray>[AFK]</gray> ";
 
     public String tellMessage = "<gold>[</gold><source> <gray>→</gray> <target><gold>]</gold> <message>";
     public String tellMessageSpy = "\uD83D\uDC41 <gray>[<source> → <target>]</gray> <message>";
@@ -21,8 +22,8 @@ public class RccServerConfigModel {
     public int teleportRequestTimeout = 120;
 
     public boolean enableTabList = true;
-    public int tabListTickDelay = 2;
-    public double tabPhaseFrequency = 40;
+    public int tabListTickDelay = 5;
+    public double tabPhasePeriod = 300;
     public ArrayList<String> tabHeader = new ArrayList<>(List.of(
             "<gradient:#DEDE6C:#CC4C4C:{phase}><st>                                  </st></gradient>"
     ));
@@ -31,5 +32,5 @@ public class RccServerConfigModel {
             "<gradient:#DEDE6C:#CC4C4C:{phase}><st>                                  </st></gradient>"
     ));
 
-    public String playerTabName = "%player:displayname_visual% %player:playtime%";
+    public String playerTabName = "%rcc-server:afk%%player:displayname_visual%";
 }

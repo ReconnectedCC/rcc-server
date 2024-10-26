@@ -5,10 +5,10 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
 
-public interface PlayerTeleport {
-    Event<PlayerTeleport> EVENT = EventFactory.createArrayBacked(PlayerTeleport.class,
+public interface PlayerTeleportEvent {
+    Event<PlayerTeleportEvent> EVENT = EventFactory.createArrayBacked(PlayerTeleportEvent.class,
             (listeners) -> (player, origin, destination) -> {
-                for (PlayerTeleport listener : listeners) {
+                for (PlayerTeleportEvent listener : listeners) {
                     listener.teleport(player, origin, destination);
                 }
             });

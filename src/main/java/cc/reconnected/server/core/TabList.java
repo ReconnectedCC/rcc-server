@@ -16,9 +16,11 @@ public class TabList {
         var minimessage = MiniMessage.miniMessage();
 
         ServerTickEvents.END_SERVER_TICK.register(server -> {
-            if(server.getTicks() % RccServer.CONFIG.tabListTickDelay() == 0) {
+            var delay = Math.max(RccServer.CONFIG.tabListTickDelay(), 1);
+            if(server.getTicks() % delay == 0) {
+                var period = Math.max(RccServer.CONFIG.tabPhasePeriod(), 1);
 
-                var phase = (Math.sin((server.getTicks() * Math.PI * 2) / RccServer.CONFIG.tabPhaseFrequency()) + 1) / 2d;
+                var phase = (Math.sin((server.getTicks() * Math.PI * 2) / period) + 1) / 2d;
 
                 server.getPlayerManager().getPlayerList().forEach(player -> {
                     var playerContext = PlaceholderContext.of(player);
