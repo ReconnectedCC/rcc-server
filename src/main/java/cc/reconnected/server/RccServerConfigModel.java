@@ -17,7 +17,7 @@ public class RccServerConfigModel {
     public String afkTag = "<gray>[AFK]</gray> ";
 
     public String tellMessage = "<gold>[</gold><source> <gray>→</gray> <target><gold>]</gold> <message>";
-    public String tellMessageSpy = "\uD83D\uDC41 <gray>[<source> → <target>]</gray> <message>";
+    public String tellMessageSpy = "\uD83D\uDC41 <gray>[<source> → <target>] <message></gray>";
 
     public int teleportRequestTimeout = 120;
 
@@ -38,8 +38,30 @@ public class RccServerConfigModel {
     public int nearCommandDefaultRange = 32;
 
     public boolean enableAutoRestart = true;
+    public String restartBarLabel = "Server restarting in <remaining_time>";
+    public String restartKickMessage = "The server is restarting!";
+    public String restartChatMessage = "<red>The server is restarting in </red><gold><remaining_time></gold>";
+
     public ArrayList<String> restartAt = new ArrayList<>(List.of(
             "06:00",
             "18:00"
+    ));
+
+    public String restartSound = "minecraft:block.note_block.bell";
+    public float restartSoundPitch = 0.9f;
+
+    public ArrayList<Integer> restartNotifications = new ArrayList<>(List.of(
+            600,
+            300,
+            120,
+            60,
+            30,
+            15,
+            10,
+            5,
+            4,
+            3,
+            2,
+            1
     ));
 }

@@ -1,6 +1,7 @@
 package cc.reconnected.server;
 
 import cc.reconnected.server.api.events.RccEvents;
+import cc.reconnected.server.commands.admin.*;
 import cc.reconnected.server.commands.home.*;
 import cc.reconnected.server.commands.misc.*;
 import cc.reconnected.server.commands.spawn.*;
@@ -101,6 +102,7 @@ public class RccServer implements ModInitializer {
             DeleteWarpCommand.register(dispatcher, registryAccess, environment);
 
             TimeBarCommand.register(dispatcher, registryAccess, environment);
+            RestartCommand.register(dispatcher, registryAccess, environment);
 
             NearCommand.register(dispatcher,  registryAccess, environment);
         });
@@ -111,6 +113,7 @@ public class RccServer implements ModInitializer {
         TabList.register();
         HttpApiServer.register();
         BossBarManager.register();
+        AutoRestart.register();
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             luckPerms = LuckPermsProvider.get();

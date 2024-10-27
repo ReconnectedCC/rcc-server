@@ -1,4 +1,4 @@
-package cc.reconnected.server.commands.misc;
+package cc.reconnected.server.commands.admin;
 
 import cc.reconnected.server.api.events.BossBarEvents;
 import cc.reconnected.server.core.BossBarManager;

@@ -1,4 +1,4 @@
-package cc.reconnected.server.commands.misc;
+package cc.reconnected.server.commands.admin;
 
 import cc.reconnected.server.RccServer;
 import cc.reconnected.server.api.events.RccEvents;

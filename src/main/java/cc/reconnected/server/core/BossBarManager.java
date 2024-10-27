@@ -5,6 +5,7 @@ import cc.reconnected.server.api.events.BossBarEvents;
 import cc.reconnected.server.util.Components;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -67,16 +68,17 @@ public class BossBarManager {
     }
 
     public TimeBar startTimeBar(String label, int seconds, BossBar.Color color, BossBar.Style style, boolean countdown) {
-        var countdownBar = new TimeBar(label, seconds, countdown, color, style);
+        var timeBar = new TimeBar(label, seconds, countdown, color, style);
 
-        timeBars.add(countdownBar);
+        timeBars.add(timeBar);
 
         var players = server.getPlayerManager().getPlayerList();
-        showBar(players, countdownBar);
+        showBar(players, timeBar);
 
-        BossBarEvents.START.invoker().onStart(countdownBar, server);
+        BossBarEvents.START.invoker().onStart(timeBar, server);
+        BossBarEvents.PROGRESS.invoker().onProgress(timeBar, server);
 
-        return countdownBar;
+        return timeBar;
     }
 
     public boolean cancelTimeBar(TimeBar timeBar) {
@@ -128,18 +130,22 @@ public class BossBarManager {
         }
 
         public void updateName() {
+            var text = parseLabel(label);
+            bossBar.setName(Components.toText(text));
+        }
+
+        public Component parseLabel(String labelString) {
             var totalTime = formatTime(this.time);
             var elapsedTime = formatTime(this.elapsedSeconds);
 
-            var remaining = time - elapsedSeconds;
+            var remaining = getRemainingSeconds();
             var remainingTime = formatTime(remaining);
-            var text = miniMessage.deserialize(label, TagResolver.resolver(
+
+            return miniMessage.deserialize(labelString, TagResolver.resolver(
                     Placeholder.parsed("total_time", totalTime),
                     Placeholder.parsed("elapsed_time", elapsedTime),
                     Placeholder.parsed("remaining_time", remainingTime)
             ));
-
-            bossBar.setName(Components.toText(text));
         }
 
         public UUID getUuid() {
@@ -160,6 +166,10 @@ public class BossBarManager {
 
         public int getElapsedSeconds() {
             return elapsedSeconds;
+        }
+
+        public int getRemainingSeconds() {
+            return time - elapsedSeconds;
         }
 
         public boolean isCountdown() {
