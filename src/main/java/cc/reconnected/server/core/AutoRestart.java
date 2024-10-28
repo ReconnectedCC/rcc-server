@@ -3,6 +3,7 @@ package cc.reconnected.server.core;
 import cc.reconnected.server.RccServer;
 import cc.reconnected.server.api.events.BossBarEvents;
 import cc.reconnected.server.api.events.RccEvents;
+import cc.reconnected.server.api.events.RestartEvents;
 import cc.reconnected.server.util.Components;
 import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
@@ -90,6 +91,8 @@ public class AutoRestart {
                 BossBar.Style.NOTCHED_20,
                 true
         );
+
+        RestartEvents.SCHEDULED.invoker().onSchedule(restartBar);
     }
 
     public static boolean isScheduled() {
@@ -99,6 +102,7 @@ public class AutoRestart {
     public static void cancel() {
         if (restartBar != null) {
             BossBarManager.getInstance().cancelTimeBar(restartBar);
+            RestartEvents.CANCELED.invoker().onCancel(restartBar);
             restartBar = null;
         }
 
