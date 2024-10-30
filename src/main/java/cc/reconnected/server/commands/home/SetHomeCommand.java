@@ -61,6 +61,12 @@ public class SetHomeCommand {
             return 1;
         }
 
+        var maxHomes = RccServer.CONFIG.homes.maxHomes();
+        if(homes.size() >= maxHomes) {
+            context.getSource().sendFeedback(() -> Text.literal("You have reached the maximum amount of homes!").formatted(Formatting.RED), false);
+            return 1;
+        }
+
         var homePosition = new ServerPosition(player);
         homes.put(name, homePosition);
 

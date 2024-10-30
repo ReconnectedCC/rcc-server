@@ -21,6 +21,9 @@ public class RccServerConfigModel {
     public TeleportRequests teleportRequests = new TeleportRequests();
 
     @Nest
+    public Homes homes = new Homes();
+
+    @Nest
     public CustomTabList customTabList = new CustomTabList();
 
     @Nest
@@ -48,6 +51,10 @@ public class RccServerConfigModel {
 
     public static class TeleportRequests {
         public int teleportRequestTimeout = 120;
+    }
+
+    public static class Homes {
+        public int maxHomes = -1;
     }
 
     public static class CustomTabList {
