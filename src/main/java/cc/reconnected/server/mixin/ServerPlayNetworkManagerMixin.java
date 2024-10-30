@@ -29,7 +29,7 @@ public abstract class ServerPlayNetworkManagerMixin {
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void rccServer$updatePlayerList(CallbackInfo ci) {
-        if(RccServer.CONFIG.enableTabList()) {
+        if(RccServer.CONFIG.customTabList.enableTabList()) {
             var packet = new PlayerListS2CPacket(EnumSet.of(PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME, PlayerListS2CPacket.Action.UPDATE_LISTED), List.of(this.player));
             this.server.getPlayerManager().sendToAll(packet);
         }

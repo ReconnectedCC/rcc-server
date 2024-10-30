@@ -37,7 +37,7 @@ public class RestartCommand {
 
     private static int schedule(CommandContext<ServerCommandSource> context, int seconds, @Nullable String message) {
         if (message == null) {
-            message = RccServer.CONFIG.restartBarLabel();
+            message = RccServer.CONFIG.autoRestart.restartBarLabel();
         }
         AutoRestart.schedule(seconds, message);
 

@@ -23,7 +23,7 @@ public class HttpApiServer {
     private static int currentPlayerCount = 0;
 
     public static void register() {
-        if (!RccServer.CONFIG.enableHttpApi())
+        if (!RccServer.CONFIG.httpApi.enableHttpApi())
             return;
 
         try {
@@ -62,7 +62,7 @@ public class HttpApiServer {
     }
 
     private HttpApiServer() throws IOException {
-        server = HttpServer.create(new InetSocketAddress(RccServer.CONFIG.httpPort()), 0);
+        server = HttpServer.create(new InetSocketAddress(RccServer.CONFIG.httpApi.httpPort()), 0);
         server.createContext("/tps", new TPSHandler());
         server.createContext("/mspt", new MSPTHandler());
         server.createContext("/player", new PlayerCountHandler());

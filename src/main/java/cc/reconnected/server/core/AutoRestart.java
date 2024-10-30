@@ -33,7 +33,7 @@ public class AutoRestart {
         var miniMessage = MiniMessage.miniMessage();
 
         RccEvents.READY.register((server, luckPerms) -> {
-            if (RccServer.CONFIG.enableAutoRestart()) {
+            if (RccServer.CONFIG.autoRestart.enableAutoRestart()) {
                 scheduleNextRestart();
             }
         });
@@ -42,7 +42,7 @@ public class AutoRestart {
             if (restartBar == null || !timeBar.getUuid().equals(restartBar.getUuid()))
                 return;
 
-            var notificationTimes = RccServer.CONFIG.restartNotifications();
+            var notificationTimes = RccServer.CONFIG.autoRestart.restartNotifications();
 
             var remainingSeconds = restartBar.getRemainingSeconds();
             if (notificationTimes.contains(remainingSeconds)) {
@@ -57,7 +57,7 @@ public class AutoRestart {
                 return;
 
             final var text = Components.toText(
-                    miniMessage.deserialize(RccServer.CONFIG.restartKickMessage())
+                    miniMessage.deserialize(RccServer.CONFIG.autoRestart.restartKickMessage())
             );
             server.getPlayerManager().getPlayerList().forEach(player -> {
                 player.networkHandler.disconnect(text);
@@ -74,7 +74,7 @@ public class AutoRestart {
     }
 
     private static void setup() {
-        var soundName = RccServer.CONFIG.restartSound();
+        var soundName = RccServer.CONFIG.autoRestart.restartSound();
         try {
             notificationKey = Key.key(soundName);
         } catch (InvalidKeyException e) {
@@ -115,10 +115,10 @@ public class AutoRestart {
     private static void notifyRestart(MinecraftServer server, BossBarManager.TimeBar bar) {
         var rcc = RccServer.getInstance();
         var audience = rcc.adventure().players();
-        var sound = Sound.sound(notificationKey, Sound.Source.MASTER, 10f, RccServer.CONFIG.restartSoundPitch());
+        var sound = Sound.sound(notificationKey, Sound.Source.MASTER, 10f, RccServer.CONFIG.autoRestart.restartSoundPitch());
         audience.playSound(sound, Sound.Emitter.self());
 
-        var comp = bar.parseLabel(RccServer.CONFIG.restartChatMessage());
+        var comp = bar.parseLabel(RccServer.CONFIG.autoRestart.restartChatMessage());
         rcc.broadcastMessage(server, comp);
     }
 
@@ -133,7 +133,7 @@ public class AutoRestart {
         var barStartTime = delay - barTime;
 
         currentSchedule = scheduler.schedule(() -> {
-            schedule(barTime, RccServer.CONFIG.restartBarLabel());
+            schedule(barTime, RccServer.CONFIG.autoRestart.restartBarLabel());
         }, barStartTime, TimeUnit.SECONDS);
 
         RccServer.LOGGER.info("Restart scheduled for in {} seconds", delay);
@@ -142,7 +142,7 @@ public class AutoRestart {
 
     @Nullable
     private static Long getNextDelay() {
-        var restartTimeStrings = RccServer.CONFIG.restartAt();
+        var restartTimeStrings = RccServer.CONFIG.autoRestart.restartAt();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime nextRunTime = null;
         long shortestDelay = Long.MAX_VALUE;
