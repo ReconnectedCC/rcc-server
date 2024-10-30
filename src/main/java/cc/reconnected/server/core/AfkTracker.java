@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class AfkTracker {
     private static final int cycleDelay = 1;
-    private static final int absentTimeTrigger = RccServer.CONFIG.afkTimeTrigger() * 20; // seconds * 20 ticks
+    private static final int absentTimeTrigger = RccServer.CONFIG.afk.afkTimeTrigger() * 20; // seconds * 20 ticks
 
     private final ConcurrentHashMap<UUID, PlayerActivityState> playerActivityStates = new ConcurrentHashMap<>();
 
@@ -57,7 +57,7 @@ public class AfkTracker {
             var displayNameJson = Text.Serializer.toJson(player.getDisplayName());
             var displayName = JSONComponentSerializer.json().deserialize(displayNameJson);
 
-            var message = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.afkMessage(),
+            var message = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.afk.afkMessage(),
                     Placeholder.component("displayname", displayName),
                     Placeholder.unparsed("username", player.getGameProfile().getName()),
                     Placeholder.unparsed("uuid", player.getUuid().toString())
@@ -72,7 +72,7 @@ public class AfkTracker {
             var displayNameJson = Text.Serializer.toJson(player.getDisplayName());
             var displayName = JSONComponentSerializer.json().deserialize(displayNameJson);
 
-            var message = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.afkReturnMessage(),
+            var message = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.afk.afkReturnMessage(),
                     Placeholder.component("displayname", displayName),
                     Placeholder.unparsed("username", player.getGameProfile().getName()),
                     Placeholder.unparsed("uuid", player.getUuid().toString())
@@ -85,7 +85,7 @@ public class AfkTracker {
     }
 
     private static void loadAfkTag() {
-        afkTag = Components.toText(MiniMessage.miniMessage().deserialize(RccServer.CONFIG.afkTag()));
+        afkTag = Components.toText(MiniMessage.miniMessage().deserialize(RccServer.CONFIG.afk.afkTag()));
     }
 
     private AfkTracker() {

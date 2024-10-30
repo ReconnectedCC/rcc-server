@@ -37,7 +37,7 @@ public class TeleportTracker {
             this.player = player;
             this.target = target;
             // Seconds in config per 20 ticks
-            this.remainingTicks = RccServer.CONFIG.teleportRequestTimeout() * 20;
+            this.remainingTicks = RccServer.CONFIG.teleportRequests.teleportRequestTimeout() * 20;
         }
 
         public void expire() {

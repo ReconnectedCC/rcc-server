@@ -14,8 +14,9 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class RccCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
         var rootCommand = literal("rcc")
-                .requires(Permissions.require("rcc.command.afk", 3))
+                .requires(Permissions.require("rcc.command.rcc", 3))
                 .then(literal("reload")
+                        .requires(Permissions.require("rcc.command.rcc.reload", 3))
                         .executes(context -> {
                             context.getSource().sendFeedback(() -> Text.of("Reloading RCC config..."), true);
 
