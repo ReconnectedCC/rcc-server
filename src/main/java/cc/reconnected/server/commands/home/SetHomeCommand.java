@@ -47,7 +47,8 @@ public class SetHomeCommand {
 
         var homes = playerState.homes;
 
-        if (homes.containsKey(name) && !forced) {
+        var exists = homes.containsKey(name);
+        if (exists && !forced) {
             var text = Component.text("You already have set this home.")
                     .appendNewline().appendSpace()
                     .append(Components.makeButton(
@@ -62,7 +63,7 @@ public class SetHomeCommand {
         }
 
         var maxHomes = RccServer.CONFIG.homes.maxHomes();
-        if(homes.size() >= maxHomes) {
+        if(homes.size() >= maxHomes && !exists) {
             context.getSource().sendFeedback(() -> Text.literal("You have reached the maximum amount of homes!").formatted(Formatting.RED), false);
             return 1;
         }
