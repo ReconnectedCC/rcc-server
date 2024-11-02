@@ -6,6 +6,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
 public class Components {
@@ -19,7 +20,7 @@ public class Components {
                 .clickEvent(ClickEvent.runCommand(command));
     }
 
-    public static Text toText(Component component) {
+    public static MutableText toText(Component component) {
         var json = JSONComponentSerializer.json().serialize(component);
         return Text.Serializer.fromJson(json);
     }

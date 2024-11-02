@@ -4,14 +4,15 @@
   "package": "cc.reconnected.server.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "ServerPlayNetworkManagerMixin"
   ],
   "client": [],
   "server": [
     "MessageCommandMixin",
-    "ServerPlayerEntityMixin",
+    "RegistryLoaderMixin",
     "SentMessageMixin",
-    "RegistryLoaderMixin"
+    "ServerPlayerEntityMixin",
+    "PlayerEntityMixin",
+    "ServerPlayNetworkManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

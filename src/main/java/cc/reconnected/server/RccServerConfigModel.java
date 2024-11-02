@@ -3,8 +3,7 @@ package cc.reconnected.server;
 import io.wispforest.owo.config.annotation.Config;
 import io.wispforest.owo.config.annotation.Nest;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Config(name = "rcc-server-config", wrapperName = "RccServerConfig")
 public class RccServerConfigModel {
@@ -31,6 +30,9 @@ public class RccServerConfigModel {
 
     @Nest
     public AutoRestart autoRestart = new AutoRestart();
+
+    @Nest
+    public CustomNameConfig customName = new CustomNameConfig();
 
     public static class HttpApi {
         public boolean enableHttpApi = true;
@@ -104,6 +106,13 @@ public class RccServerConfigModel {
                 3,
                 2,
                 1
+        ));
+    }
+
+    public static class CustomNameConfig {
+        public LinkedHashMap<String, String> formats = new LinkedHashMap<>(Map.of(
+                "admin", "<red><username></red>",
+                "default", "<green><username></green>"
         ));
     }
 }

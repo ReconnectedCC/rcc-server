@@ -1,6 +1,7 @@
 package cc.reconnected.server.mixin;
 
 import cc.reconnected.server.RccServer;
+import net.minecraft.network.message.SignedMessage;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.MinecraftServer;
@@ -33,6 +34,11 @@ public abstract class ServerPlayNetworkManagerMixin {
             var packet = new PlayerListS2CPacket(EnumSet.of(PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME, PlayerListS2CPacket.Action.UPDATE_LISTED), List.of(this.player));
             this.server.getPlayerManager().sendToAll(packet);
         }
+    }
+
+    @Inject(method = "handleDecoratedMessage", at = @At("HEAD"))
+    private void rccServer$handleDecoratedMessage(SignedMessage message, CallbackInfo ci) {
+
     }
 
 
