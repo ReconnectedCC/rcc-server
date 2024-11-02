@@ -9,7 +9,9 @@
   "client": [],
   "server": [
     "MessageCommandMixin",
-    "ServerPlayerEntityMixin"
+    "ServerPlayerEntityMixin",
+    "SentMessageMixin",
+    "RegistryLoaderMixin"
   ],
   "injectors": {
     "defaultRequire": 1
