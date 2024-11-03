@@ -126,6 +126,6 @@ public class RccServerConfigModel {
         public String joinFormat = "<green>+</green> <display_name> <yellow>joined!</yellow>";
         public String joinRenamedFormat = "<green>+</green> <display_name> <yellow>joined! <i>(Previously known as <previous_name>)</i></yellow>";
         public String leaveFormat = "<red>-</red> <display_name> <yellow>left!</yellow>";
-        public String deathFormat = "<gray>\uD83D\uDC80 <death_message></gray>";
+        public String deathFormat = "<gray>\u2620 <death_message></gray>";
     }
 }
