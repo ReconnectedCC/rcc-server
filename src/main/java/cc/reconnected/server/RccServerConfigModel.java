@@ -34,6 +34,9 @@ public class RccServerConfigModel {
     @Nest
     public CustomNameConfig customName = new CustomNameConfig();
 
+    @Nest
+    public CustomChatFormat customChatFormat = new CustomChatFormat();
+
     public static class HttpApi {
         public boolean enableHttpApi = true;
         public int httpPort = 25581;
@@ -114,5 +117,15 @@ public class RccServerConfigModel {
                 "admin", "<red><username></red>",
                 "default", "<green><username></green>"
         ));
+    }
+
+    public static class CustomChatFormat {
+        public boolean enableMarkdown = true;
+        public String chatFormat = "<display_name><gray>:</gray> <message>";
+        public String emoteFormat = "<gray>\uD83D\uDC64 <display_name> <i><message></i></gray>";
+        public String joinFormat = "<green>+</green> <display_name> <yellow>joined!</yellow>";
+        public String joinRenamedFormat = "<green>+</green> <display_name> <yellow>joined! <i>(Previously known as <previous_name>)</i></yellow>";
+        public String leaveFormat = "<red>-</red> <display_name> <yellow>left!</yellow>";
+        public String deathFormat = "<gray>\uD83D\uDC80 <death_message></gray>";
     }
 }

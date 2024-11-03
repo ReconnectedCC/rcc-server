@@ -26,7 +26,7 @@ public class RegistryLoaderMixin {
             if(registry.getKey().equals(RegistryKeys.MESSAGE_TYPE)) {
                 Registry.register((Registry<MessageType>) registry, RccServer.CHAT_TYPE,
                         new MessageType(
-                                Decoration.ofChat("%s: %s"),
+                                Decoration.ofChat("%s"),
                                 Decoration.ofChat("%s")
                         ));
             }

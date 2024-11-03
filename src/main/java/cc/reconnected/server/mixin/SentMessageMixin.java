@@ -1,11 +1,8 @@
 package cc.reconnected.server.mixin;
 
-import cc.reconnected.server.struct.CustomChatMessage;
-import net.minecraft.network.message.MessageType;
+import cc.reconnected.server.core.customChat.CustomSentMessage;
 import net.minecraft.network.message.SentMessage;
 import net.minecraft.network.message.SignedMessage;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,10 +14,10 @@ public interface SentMessageMixin {
     @Inject(method = "of", at = @At("HEAD"), cancellable = true)
     private static void rccServer$of(SignedMessage message, CallbackInfoReturnable<SentMessage> cir) {
 
-        if(message.hasSignature()) {
-            cir.setReturnValue(new CustomChatMessage(message));
-        } else {
+        if(message.isSenderMissing()) {
             cir.setReturnValue(new SentMessage.Profileless(message.getContent()));
+        } else {
+            cir.setReturnValue(new CustomSentMessage(message));
         }
     }
 }

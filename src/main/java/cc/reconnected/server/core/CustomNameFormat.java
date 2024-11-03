@@ -1,7 +1,9 @@
-package cc.reconnected.server.core.nameFormat;
+package cc.reconnected.server.core;
 
 import cc.reconnected.server.RccServer;
 import cc.reconnected.server.util.Components;
+import eu.pb4.placeholders.api.PlaceholderContext;
+import eu.pb4.placeholders.api.Placeholders;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -14,6 +16,7 @@ public class CustomNameFormat {
     public static MutableText getNameForPlayer(ServerPlayerEntity player) {
         var formats = RccServer.CONFIG.customName.formats().entrySet();
         var lp = RccServer.getInstance().luckPerms();
+        var playerContext = PlaceholderContext.of(player);
 
         var user = lp.getPlayerAdapter(ServerPlayerEntity.class).getUser(player);
 
@@ -35,6 +38,6 @@ public class CustomNameFormat {
                 Placeholder.parsed("username", player.getGameProfile().getName())
         ));
 
-        return Components.toText(displayName);
+        return Placeholders.parseText(Components.toText(displayName), playerContext).copy();
     }
 }

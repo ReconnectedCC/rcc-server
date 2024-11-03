@@ -8,11 +8,13 @@
   "client": [],
   "server": [
     "MessageCommandMixin",
+    "PlayerEntityMixin",
     "RegistryLoaderMixin",
     "SentMessageMixin",
     "ServerPlayerEntityMixin",
-    "PlayerEntityMixin",
-    "ServerPlayNetworkManagerMixin"
+    "ServerPlayNetworkManagerMixin",
+    "PlayerManagerMixin"
+
   ],
   "injectors": {
     "defaultRequire": 1

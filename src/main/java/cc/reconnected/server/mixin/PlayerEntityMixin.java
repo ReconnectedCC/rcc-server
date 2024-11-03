@@ -1,12 +1,11 @@
 package cc.reconnected.server.mixin;
 
-import cc.reconnected.server.core.nameFormat.CustomNameFormat;
+import cc.reconnected.server.core.CustomNameFormat;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;

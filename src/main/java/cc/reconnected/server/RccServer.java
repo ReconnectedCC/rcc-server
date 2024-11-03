@@ -56,6 +56,8 @@ public class RccServer implements ModInitializer {
         return luckPerms;
     }
 
+    public static MinecraftServer server;
+
     private volatile FabricServerAudiences adventure;
 
     public FabricServerAudiences adventure() {
@@ -73,6 +75,7 @@ public class RccServer implements ModInitializer {
         LOGGER.info("Starting rcc-server");
 
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
+            RccServer.server = server;
             state.register(server.getSavePath(WorldSavePath.ROOT).resolve("data").resolve(RccServer.MOD_ID));
             this.adventure = FabricServerAudiences.of(server);
         });
