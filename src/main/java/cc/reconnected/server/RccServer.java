@@ -19,8 +19,12 @@ import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
+import net.minecraft.network.message.MessageType;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.WorldSavePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +56,8 @@ public class RccServer implements ModInitializer {
         return luckPerms;
     }
 
+    public static MinecraftServer server;
+
     private volatile FabricServerAudiences adventure;
 
     public FabricServerAudiences adventure() {
@@ -62,11 +68,14 @@ public class RccServer implements ModInitializer {
         return ret;
     }
 
+    public static final RegistryKey<MessageType> CHAT_TYPE = RegistryKey.of(RegistryKeys.MESSAGE_TYPE, new Identifier(MOD_ID, "chat"));
+
     @Override
     public void onInitialize() {
         LOGGER.info("Starting rcc-server");
 
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
+            RccServer.server = server;
             state.register(server.getSavePath(WorldSavePath.ROOT).resolve("data").resolve(RccServer.MOD_ID));
             this.adventure = FabricServerAudiences.of(server);
         });
