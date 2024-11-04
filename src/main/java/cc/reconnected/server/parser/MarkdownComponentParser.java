@@ -1,10 +1,8 @@
 package cc.reconnected.server.parser;
 
 import eu.pb4.placeholders.api.node.TextNode;
-import eu.pb4.placeholders.api.node.parent.ClickActionNode;
-import eu.pb4.placeholders.api.node.parent.FormattingNode;
-import eu.pb4.placeholders.api.node.parent.HoverNode;
-import net.minecraft.text.ClickEvent;
+import eu.pb4.placeholders.api.node.parent.*;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
 public class MarkdownComponentParser {
@@ -32,7 +30,11 @@ public class MarkdownComponentParser {
         return new HoverNode<>(TextNode.array(
                 new ClickActionNode(
                         TextNode.array(
-                                new FormattingNode(textNodes, Formatting.BLUE, Formatting.UNDERLINE)),
+                                new StyledNode(textNodes,
+                                        Style.EMPTY.withColor(0x8888ff).withUnderline(true),
+                                        null, null, null
+                                )
+                        ),
                         ClickEvent.Action.OPEN_URL, url)),
                 HoverNode.Action.TEXT, TextNode.of("Click to open: " + url.toText().getString())
         );

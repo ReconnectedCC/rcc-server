@@ -8,6 +8,8 @@ import cc.reconnected.server.commands.spawn.*;
 import cc.reconnected.server.commands.teleport.*;
 import cc.reconnected.server.commands.tell.*;
 import cc.reconnected.server.commands.warp.*;
+import cc.reconnected.server.config.Config;
+import cc.reconnected.server.config.ConfigManager;
 import cc.reconnected.server.core.*;
 import cc.reconnected.server.data.StateManager;
 import net.fabricmc.api.ModInitializer;
@@ -36,7 +38,7 @@ public class RccServer implements ModInitializer {
     public static final String MOD_ID = "rcc-server";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    public static final cc.reconnected.server.RccServerConfig CONFIG = cc.reconnected.server.RccServerConfig.createAndLoad();
+    public static Config CONFIG = ConfigManager.load();
 
     public static final StateManager state = new StateManager();
 

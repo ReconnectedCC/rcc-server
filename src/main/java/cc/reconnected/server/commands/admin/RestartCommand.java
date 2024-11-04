@@ -1,7 +1,6 @@
 package cc.reconnected.server.commands.admin;
 
 import cc.reconnected.server.RccServer;
-import cc.reconnected.server.api.events.RccEvents;
 import cc.reconnected.server.core.AutoRestart;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -37,7 +36,7 @@ public class RestartCommand {
 
     private static int schedule(CommandContext<ServerCommandSource> context, int seconds, @Nullable String message) {
         if (message == null) {
-            message = RccServer.CONFIG.autoRestart.restartBarLabel();
+            message = RccServer.CONFIG.autoRestart.restartBarLabel;
         }
         AutoRestart.schedule(seconds, message);
 

@@ -1,41 +1,21 @@
-package cc.reconnected.server;
+package cc.reconnected.server.config;
 
-import io.wispforest.owo.config.annotation.Config;
-import io.wispforest.owo.config.annotation.Nest;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.*;
+public class Config {
+    Config() {
+    }
 
-@Config(name = "rcc-server-config", wrapperName = "RccServerConfig")
-public class RccServerConfigModel {
-    @Nest
     public HttpApi httpApi = new HttpApi();
-
-    @Nest
     public Afk afk = new Afk();
-
-    @Nest
     public DirectMessages directMessages = new DirectMessages();
-
-    @Nest
     public TeleportRequests teleportRequests = new TeleportRequests();
-
-    @Nest
     public Homes homes = new Homes();
-
-    @Nest
     public CustomTabList customTabList = new CustomTabList();
-
-    @Nest
     public NearCommand nearCommand = new NearCommand();
-
-    @Nest
     public AutoRestart autoRestart = new AutoRestart();
-
-    @Nest
-    public CustomNameConfig customName = new CustomNameConfig();
-
-    @Nest
-    public CustomChatFormat customChatFormat = new CustomChatFormat();
+    public TextFormats textFormats = new TextFormats();
 
     public static class HttpApi {
         public boolean enableHttpApi = true;
@@ -112,20 +92,24 @@ public class RccServerConfigModel {
         ));
     }
 
-    public static class CustomNameConfig {
-        public LinkedHashMap<String, String> formats = new LinkedHashMap<>(Map.of(
-                "admin", "<red><username></red>",
-                "default", "<green><username></green>"
+    public static class TextFormats {
+        public record NameFormat(String group, String format) {
+        }
+
+        public boolean enableChatMarkdown = true;
+
+        public ArrayList<NameFormat> nameFormats = new ArrayList<>(List.of(
+                new NameFormat("admin", "<red>%player:name%</red>"),
+                new NameFormat("default", "<green>%player:name%</green>")
         ));
+
+        public String chatFormat = "${player}<gray>:</gray> ${message}";
+        public String emoteFormat = "<gray>\uD83D\uDC64 ${player} <i>${message}</i></gray>";
+        public String joinFormat = "<green>+</green> ${player} <yellow>joined!</yellow>";
+        public String joinRenamedFormat = "<green>+</green> ${player} <yellow>joined! <i>(Previously known as ${previousName})</i></yellow>";
+        public String leaveFormat = "<red>-</red> ${player} <yellow>left!</yellow>";
+        public String deathFormat = "<gray>\u2620 ${message}</gray>";
     }
 
-    public static class CustomChatFormat {
-        public boolean enableMarkdown = true;
-        public String chatFormat = "<display_name><gray>:</gray> <message>";
-        public String emoteFormat = "<gray>\uD83D\uDC64 <display_name> <i><message></i></gray>";
-        public String joinFormat = "<green>+</green> <display_name> <yellow>joined!</yellow>";
-        public String joinRenamedFormat = "<green>+</green> <display_name> <yellow>joined! <i>(Previously known as <previous_name>)</i></yellow>";
-        public String leaveFormat = "<red>-</red> <display_name> <yellow>left!</yellow>";
-        public String deathFormat = "<gray>\u2620 <death_message></gray>";
-    }
+
 }

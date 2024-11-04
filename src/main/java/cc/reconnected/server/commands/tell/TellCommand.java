@@ -71,17 +71,17 @@ public class TellCommand {
 
         var parsedMessage = MarkdownParser.defaultParser.parseNode(message);
         var you = Component.text("You", NamedTextColor.GRAY, TextDecoration.ITALIC);
-        var sourceText = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.directMessages.tellMessage(),
+        var sourceText = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.directMessages.tellMessage,
                 Placeholder.component("source", you),
                 Placeholder.component("target", targetDisplayName),
                 Placeholder.component("message", parsedMessage.toText()));
 
-        var targetText = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.directMessages.tellMessage(),
+        var targetText = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.directMessages.tellMessage,
                 Placeholder.component("source", source.getDisplayName()),
                 Placeholder.component("target", you),
                 Placeholder.component("message", parsedMessage.toText()));
 
-        var text = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.directMessages.tellMessage(),
+        var text = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.directMessages.tellMessage,
                 Placeholder.component("source", source.getDisplayName()),
                 Placeholder.component("target", targetDisplayName),
                 Placeholder.component("message", parsedMessage.toText()));
@@ -104,7 +104,7 @@ public class TellCommand {
 
         var lp = RccServer.getInstance().luckPerms();
         var playerAdapter = lp.getPlayerAdapter(ServerPlayerEntity.class);
-        var spyText = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.directMessages.tellMessageSpy(),
+        var spyText = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.directMessages.tellMessageSpy,
                 Placeholder.component("source", source.getDisplayName()),
                 Placeholder.component("target", targetDisplayName),
                 Placeholder.component("message", parsedMessage.toText()));

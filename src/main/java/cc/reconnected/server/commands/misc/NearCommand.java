@@ -26,9 +26,9 @@ public class NearCommand {
                         context.getSource().sendFeedback(() -> Text.of("This command can only be executed by players!"), false);
                         return 1;
                     }
-                    return execute(context, RccServer.CONFIG.nearCommand.nearCommandDefaultRange(), context.getSource().getPlayer());
+                    return execute(context, RccServer.CONFIG.nearCommand.nearCommandDefaultRange, context.getSource().getPlayer());
                 })
-                .then(argument("radius", IntegerArgumentType.integer(0, RccServer.CONFIG.nearCommand.nearCommandMaxRange()))
+                .then(argument("radius", IntegerArgumentType.integer(0, RccServer.CONFIG.nearCommand.nearCommandMaxRange))
                         .executes(context -> {
                             if (!context.getSource().isExecutedByPlayer()) {
                                 context.getSource().sendFeedback(() -> Text.of("This command can only be executed by players!"), false);

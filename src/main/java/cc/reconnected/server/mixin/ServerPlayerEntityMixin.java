@@ -23,10 +23,10 @@ public class ServerPlayerEntityMixin {
 
     @Inject(method = "getPlayerListName", at = @At("HEAD"), cancellable = true)
     private void rccServer$customizePlayerListName(CallbackInfoReturnable<Text> callback) {
-        if (RccServer.CONFIG.customTabList.enableTabList()) {
+        if (RccServer.CONFIG.customTabList.enableTabList) {
             var player = (ServerPlayerEntity) (Object) this;
             var playerContext = PlaceholderContext.of(player);
-            var text = Placeholders.parseText(parser.parseNode(RccServer.CONFIG.customTabList.playerTabName()), playerContext);
+            var text = Placeholders.parseText(parser.parseNode(RccServer.CONFIG.customTabList.playerTabName), playerContext);
             callback.setReturnValue(text);
         }
     }

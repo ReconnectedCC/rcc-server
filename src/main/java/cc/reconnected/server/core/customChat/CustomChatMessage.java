@@ -3,6 +3,10 @@ package cc.reconnected.server.core.customChat;
 import cc.reconnected.server.RccServer;
 import cc.reconnected.server.parser.MarkdownParser;
 import cc.reconnected.server.util.Components;
+import eu.pb4.placeholders.api.Placeholders;
+import eu.pb4.placeholders.api.TextParserUtils;
+import eu.pb4.placeholders.api.node.TextNode;
+import eu.pb4.placeholders.api.parsers.PatternPlaceholderParser;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -12,6 +16,8 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
+import java.util.Map;
+
 public class CustomChatMessage {
     private static final MiniMessage miniMessage = MiniMessage.miniMessage();
 
@@ -19,19 +25,16 @@ public class CustomChatMessage {
         var playerUuid = message.link().sender();
         var player = RccServer.server.getPlayerManager().getPlayer(playerUuid);
 
-        Text messageText;
-        if (RccServer.CONFIG.customChatFormat.enableMarkdown()) {
-            messageText = MarkdownParser.defaultParser.parseNode(message.getSignedContent()).toText();
-        } else {
-            messageText = message.getContent();
-        }
+        Text messageText = Utils.formatChatMessage(message, player);
 
-        var component = miniMessage.deserialize(RccServer.CONFIG.customChatFormat.chatFormat(), TagResolver.resolver(
-                Placeholder.component("display_name", player.getDisplayName()),
-                Placeholder.component("message", messageText)
-        ));
+        var placeholders = Map.of(
+                "message", messageText,
+                "player", player.getDisplayName()
+        );
 
-        var text = Components.toText(component);
+
+        var format = TextParserUtils.formatText(RccServer.CONFIG.textFormats.chatFormat);
+        var text = Placeholders.parseText(format, PatternPlaceholderParser.PREDEFINED_PLACEHOLDER_PATTERN, placeholders);
 
         var msgType = RccServer.server.getRegistryManager().get(RegistryKeys.MESSAGE_TYPE).getOrThrow(RccServer.CHAT_TYPE);
         var newParams = new MessageType.Parameters(msgType, text, null);

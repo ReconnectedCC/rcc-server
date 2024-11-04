@@ -1,12 +1,10 @@
 package cc.reconnected.server.core;
 
 import cc.reconnected.server.RccServer;
-import cc.reconnected.server.util.Components;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.Placeholders;
+import eu.pb4.placeholders.api.TextParserUtils;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.luckperms.api.model.group.Group;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
@@ -14,7 +12,7 @@ import net.minecraft.text.MutableText;
 public class CustomNameFormat {
     private static final MiniMessage miniMessage = MiniMessage.miniMessage();
     public static MutableText getNameForPlayer(ServerPlayerEntity player) {
-        var formats = RccServer.CONFIG.customName.formats().entrySet();
+        var formats = RccServer.CONFIG.textFormats.nameFormats;
         var lp = RccServer.getInstance().luckPerms();
         var playerContext = PlaceholderContext.of(player);
 
@@ -23,21 +21,18 @@ public class CustomNameFormat {
         var groups = user.getInheritedGroups(user.getQueryOptions()).stream().map(Group::getName).toList();
 
         String format = null;
-        for (var entry : formats) {
-            if (groups.contains(entry.getKey())) {
-                format = entry.getValue();
+        for (var f : formats) {
+            if (groups.contains(f.group())) {
+                format = f.format();
                 break;
             }
         }
 
         if (format == null) {
-            format = "<username>";
+            format = "%player:name%";
         }
 
-        var displayName = miniMessage.deserialize(format, TagResolver.resolver(
-                Placeholder.parsed("username", player.getGameProfile().getName())
-        ));
-
-        return Placeholders.parseText(Components.toText(displayName), playerContext).copy();
+        var output = TextParserUtils.formatText(format);
+        return Placeholders.parseText(output, playerContext).copy();
     }
 }
