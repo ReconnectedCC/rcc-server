@@ -5,6 +5,11 @@ import cc.reconnected.server.parser.MarkdownParser;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import eu.pb4.placeholders.api.PlaceholderContext;
+import eu.pb4.placeholders.api.Placeholders;
+import eu.pb4.placeholders.api.node.TextNode;
+import eu.pb4.placeholders.api.parsers.PatternPlaceholderParser;
+import eu.pb4.placeholders.api.parsers.TextParserV1;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -21,6 +26,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static net.minecraft.server.command.CommandManager.*;
 
@@ -63,28 +69,59 @@ public class TellCommand {
         } else {
             targetPlayer = source.getServer().getPlayerManager().getPlayer(targetName);
             if (targetPlayer == null) {
-                source.sendFeedback(() -> Text.literal("Player \"" + targetName + "\" not found").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+                var placeholders = Map.of(
+                        "targetPlayer", Text.of(targetName)
+                );
+                var sourceContext = PlaceholderContext.of(source);
+
+                source.sendFeedback(() -> Placeholders.parseText(
+                        TextParserV1.DEFAULT.parseNode(RccServer.CONFIG.textFormats.commands.tell.playerNotFound),
+                        sourceContext,
+                        PatternPlaceholderParser.PREDEFINED_PLACEHOLDER_PATTERN, placeholders
+                ), false);
                 return;
             }
             targetDisplayName = targetPlayer.getDisplayName();
         }
 
-        var parsedMessage = MarkdownParser.defaultParser.parseNode(message);
-        var you = Component.text("You", NamedTextColor.GRAY, TextDecoration.ITALIC);
-        var sourceText = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.directMessages.tellMessage,
-                Placeholder.component("source", you),
-                Placeholder.component("target", targetDisplayName),
-                Placeholder.component("message", parsedMessage.toText()));
+        var parsedMessage = MarkdownParser.defaultParser.parseNode(message).toText();
 
-        var targetText = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.directMessages.tellMessage,
-                Placeholder.component("source", source.getDisplayName()),
-                Placeholder.component("target", you),
-                Placeholder.component("message", parsedMessage.toText()));
+        var serverContext = PlaceholderContext.of(source.getServer());
+        var sourceContext = PlaceholderContext.of(source);
+        PlaceholderContext targetContext;
+        if (targetPlayer == null) {
+            targetContext = serverContext;
+        } else {
+            targetContext = PlaceholderContext.of(targetPlayer);
+        }
 
-        var text = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.directMessages.tellMessage,
-                Placeholder.component("source", source.getDisplayName()),
-                Placeholder.component("target", targetDisplayName),
-                Placeholder.component("message", parsedMessage.toText()));
+
+        var you = TextParserV1.DEFAULT.parseNode(RccServer.CONFIG.textFormats.commands.tell.you).toText();
+
+        var placeholdersToSource = Map.of(
+                "sourcePlayer", you,
+                "targetPlayer", targetDisplayName,
+                "message", parsedMessage
+        );
+
+        var placeholdersToTarget = Map.of(
+                "sourcePlayer", source.getDisplayName(),
+                "targetPlayer", you,
+                "message", parsedMessage
+        );
+
+        var placeholders = Map.of(
+                "sourcePlayer", source.getDisplayName(),
+                "targetPlayer", targetDisplayName,
+                "message", parsedMessage
+        );
+
+        var parser = TextParserV1.DEFAULT;
+
+        var sourceText = Placeholders.parseText(parser.parseNode(RccServer.CONFIG.textFormats.commands.tell.message), sourceContext, PatternPlaceholderParser.PREDEFINED_PLACEHOLDER_PATTERN, placeholdersToSource);
+        var targetText = Placeholders.parseText(parser.parseNode(RccServer.CONFIG.textFormats.commands.tell.message), targetContext, PatternPlaceholderParser.PREDEFINED_PLACEHOLDER_PATTERN, placeholdersToTarget);
+        var genericText = Placeholders.parseText(parser.parseNode(RccServer.CONFIG.textFormats.commands.tell.message), serverContext, PatternPlaceholderParser.PREDEFINED_PLACEHOLDER_PATTERN, placeholders);
+        var spyText = Placeholders.parseText(parser.parseNode(RccServer.CONFIG.textFormats.commands.tell.messageSpy), serverContext, PatternPlaceholderParser.PREDEFINED_PLACEHOLDER_PATTERN, placeholders);
 
         lastSender.put(targetName, source.getName());
         lastSender.put(source.getName(), targetName);
@@ -95,7 +132,7 @@ public class TellCommand {
         if (targetPlayer != null) {
             targetPlayer.sendMessage(targetText);
             if (source.isExecutedByPlayer()) {
-                source.getServer().sendMessage(text);
+                source.getServer().sendMessage(genericText);
             }
         } else {
             // avoid duped message
@@ -104,10 +141,6 @@ public class TellCommand {
 
         var lp = RccServer.getInstance().luckPerms();
         var playerAdapter = lp.getPlayerAdapter(ServerPlayerEntity.class);
-        var spyText = MiniMessage.miniMessage().deserialize(RccServer.CONFIG.directMessages.tellMessageSpy,
-                Placeholder.component("source", source.getDisplayName()),
-                Placeholder.component("target", targetDisplayName),
-                Placeholder.component("message", parsedMessage.toText()));
         source.getServer().getPlayerManager().getPlayerList().forEach(player -> {
             var playerName = player.getGameProfile().getName();
             if (playerName.equals(targetName) || playerName.equals(source.getName())) {

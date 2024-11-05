@@ -1,10 +1,15 @@
 package cc.reconnected.server.commands.teleport;
 
+import cc.reconnected.server.RccServer;
 import cc.reconnected.server.core.TeleportTracker;
 import cc.reconnected.server.util.Components;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import eu.pb4.placeholders.api.PlaceholderContext;
+import eu.pb4.placeholders.api.Placeholders;
+import eu.pb4.placeholders.api.parsers.PatternPlaceholderParser;
+import eu.pb4.placeholders.api.parsers.TextParserV1;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.command.CommandRegistryAccess;
@@ -14,6 +19,8 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+
+import java.util.Map;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -48,8 +55,14 @@ public class TeleportAskHereCommand {
         var targetName = StringArgumentType.getString(context, "player");
         var playerManager = server.getPlayerManager();
         var target = playerManager.getPlayer(targetName);
+        var playerContext = PlaceholderContext.of(player);
+        var parser = TextParserV1.DEFAULT;
         if (target == null) {
-            source.sendFeedback(() -> Text.literal("Player \"" + targetName + "\" not found!").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+            var placeholders = Map.of(
+                    "targetPlayer", Text.of(targetName)
+            );
+            var text = parser.parseNode(RccServer.CONFIG.textFormats.commands.teleportRequest.playerNotFound);
+            source.sendFeedback(() -> Placeholders.parseText(text, playerContext, PatternPlaceholderParser.PREDEFINED_PLACEHOLDER_PATTERN, placeholders), false);
             return;
         }
 
@@ -57,17 +70,26 @@ public class TeleportAskHereCommand {
         var targetRequests = TeleportTracker.teleportRequests.get(target.getUuid());
         targetRequests.addLast(request);
 
-        var requestMessage = Component.empty()
-                .append(player.getDisplayName())
-                .appendSpace()
-                .append(Component.text("requested you to teleport to them.", NamedTextColor.GOLD))
-                .appendNewline().appendSpace()
-                .append(Components.makeButton(Component.text("Accept", NamedTextColor.GREEN), Component.text("Click to accept request"), "/tpaccept " + request.requestId))
-                .appendSpace()
-                .append(Components.makeButton(Component.text("Refuse", NamedTextColor.RED), Component.text("Click to refuse request"), "/tpdeny " + request.requestId));
+        var targetContext = PlaceholderContext.of(target);
+        var placeholders = Map.of(
+                "requesterPlayer", player.getDisplayName(),
+                "acceptButton", Components.button(
+                        RccServer.CONFIG.textFormats.commands.common.accept,
+                        RccServer.CONFIG.textFormats.commands.teleportRequest.hoverAccept,
+                        "/tpaccept " + request.requestId),
+                "refuseButton", Components.button(
+                        RccServer.CONFIG.textFormats.commands.common.refuse,
+                        RccServer.CONFIG.textFormats.commands.teleportRequest.hoverRefuse,
+                        "/tpdeny " + request.requestId)
+        );
 
-        target.sendMessage(requestMessage);
+        var requestText = Placeholders.parseText(
+                parser.parseNode(RccServer.CONFIG.textFormats.commands.teleportRequest.pendingTeleportHere),
+                targetContext, PatternPlaceholderParser.PREDEFINED_PLACEHOLDER_PATTERN, placeholders
+        );
 
-        source.sendFeedback(() -> Text.literal("Teleport request sent.").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), false);
+        target.sendMessage(requestText);
+
+        source.sendFeedback(() -> parser.parseNode(RccServer.CONFIG.textFormats.commands.teleportRequest.requestSent).toText(), false);
     }
 }

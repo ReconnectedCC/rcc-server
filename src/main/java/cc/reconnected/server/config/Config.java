@@ -9,7 +9,6 @@ public class Config {
 
     public HttpApi httpApi = new HttpApi();
     public Afk afk = new Afk();
-    public DirectMessages directMessages = new DirectMessages();
     public TeleportRequests teleportRequests = new TeleportRequests();
     public Homes homes = new Homes();
     public CustomTabList customTabList = new CustomTabList();
@@ -24,14 +23,6 @@ public class Config {
 
     public static class Afk {
         public int afkTimeTrigger = 300;
-        public String afkMessage = "<gray><displayname> is now AFK</gray>";
-        public String afkReturnMessage = "<gray><displayname> is no longer AFK</gray>";
-        public String afkTag = "<gray>[AFK]</gray> ";
-    }
-
-    public static class DirectMessages {
-        public String tellMessage = "<gold>[</gold><source> <gray>→</gray> <target><gold>]</gold> <message>";
-        public String tellMessageSpy = "\uD83D\uDC41 <gray>[<source> → <target>] <message></gray>";
     }
 
     public static class TeleportRequests {
@@ -103,12 +94,71 @@ public class Config {
                 new NameFormat("default", "<green>%player:name%</green>")
         ));
 
-        public String chatFormat = "${player}<gray>:</gray> ${message}";
-        public String emoteFormat = "<gray>\uD83D\uDC64 ${player} <i>${message}</i></gray>";
-        public String joinFormat = "<green>+</green> ${player} <yellow>joined!</yellow>";
-        public String joinRenamedFormat = "<green>+</green> ${player} <yellow>joined! <i>(Previously known as ${previousName})</i></yellow>";
-        public String leaveFormat = "<red>-</red> ${player} <yellow>left!</yellow>";
+        public String chatFormat = "%player:displayname%<gray>:</gray> ${message}";
+        public String emoteFormat = "<gray>\uD83D\uDC64 %player:displayname% <i>${message}</i></gray>";
+        public String joinFormat = "<green>+</green> %player:displayname% <yellow>joined!</yellow>";
+        public String joinRenamedFormat = "<green>+</green> %player:displayname% <yellow>joined! <i>(Previously known as ${previousName})</i></yellow>";
+        public String leaveFormat = "<red>-</red> %player:displayname% <yellow>left!</yellow>";
         public String deathFormat = "<gray>\u2620 ${message}</gray>";
+
+        public Commands commands = new Commands();
+
+        public static class Commands {
+            public Common common = new Common();
+            public Home home = new Home();
+            public Spawn spawn = new Spawn();
+            public TeleportRequest teleportRequest = new TeleportRequest();
+            public Tell tell = new Tell();
+            public Warp warp = new Warp();
+            public Afk afk = new Afk();
+
+            public static class Common {
+                // `{{command}}` is replaced as a string before parsing
+                public String button = "<click:run_command:'{{command}}'><hover:show_text:'${hoverText}'><aqua>[</aqua>${label}<aqua>]</aqua></hover></click>";
+                public String accept = "<green>Accept</green>";
+                public String refuse = "<red>Refuse</red>";
+            }
+
+            public static class Home {
+                public String teleporting = "<gold>Teleporting to <yellow>${home}</yellow></gold>";
+                public String homeExists = "<gold>You already have set this home.</gold>\n ${forceSetButton}";
+                public String homeNotFound = "<red>The home <yellow>${home}</yellow> does not exist!</red>";
+                public String maxHomesReached = "<red>You have reached the maximum amount of homes!</red>";
+                public String homeSetSuccess = "<gold>New home <yellow>${home}</yellow> set!</gold>";
+            }
+
+            public static class Spawn {
+                public String teleporting = "<gold>Teleporting to spawn...</gold>";
+            }
+
+            public static class TeleportRequest {
+                public String playerNotFound = "<red>Player <yellow>${targetPlayer}</yellow> not found!</red>";
+                public String requestSent = "<gold>Teleport request sent.</gold>";
+                public String pendingTeleport = "${requesterPlayer} <gold>requested to teleport to you.</gold>\n ${acceptButton} ${refuseButton}";
+                public String pendingTeleportHere = "${requesterPlayer} <gold>requested you to teleport to them.</gold>\n ${acceptButton} ${refuseButton}";
+                public String hoverAccept = "Click to accept request";
+                public String hoverRefuse = "Click to refuse request";
+            }
+
+            public static class Tell {
+                public String playerNotFound = "<red>Player <yellow>${targetPlayer}</yellow> not found!</red>";
+                public String you = "<gray><i>You</i></gray>";
+                public String message = "<gold>[</gold>${sourcePlayer} <gray>→</gray> ${targetPlayer}<gold>]</gold> ${message}";
+                public String messageSpy = "\uD83D\uDC41 <gray>[${sourcePlayer} → ${targetPlayer}] ${message}</gray>";
+                public String noLastSenderReply = "<red>You have no one to reply to.</red>"; // relatable
+            }
+
+            public static class Warp {
+                public String teleporting = "<gold>Warping to <yellow>${warp}</yellow>...</gold>";
+                public String warpNotFound = "<red>The warp <yellow>${warp}</yellow> does not exist!</red>";
+            }
+
+            public static class Afk {
+                public String goneAfk = "<gray>%player:displayname% is now AFK</gray>";
+                public String returnAfk = "<gray>%player:displayname% is no longer AFK</gray>";
+                public String tag = "<gray>[AFK]</gray> ";
+            }
+        }
     }
 
 

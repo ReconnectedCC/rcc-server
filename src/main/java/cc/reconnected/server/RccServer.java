@@ -26,6 +26,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.WorldSavePath;
 import org.slf4j.Logger;
@@ -156,9 +157,16 @@ public class RccServer implements ModInitializer {
         });
     }
 
-    public void broadcastMessage(MinecraftServer server, Component message) {
+
+
+    public void broadcastComponent(MinecraftServer server, Component message) {
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             player.sendMessage(message);
         }
     }
+
+    public void broadcast(Text text) {
+        server.getPlayerManager().broadcast(text, false);
+    }
+
 }

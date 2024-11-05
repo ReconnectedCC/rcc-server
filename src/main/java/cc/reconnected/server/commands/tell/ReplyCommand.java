@@ -1,8 +1,12 @@
 package cc.reconnected.server.commands.tell;
 
+import cc.reconnected.server.RccServer;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import eu.pb4.placeholders.api.PlaceholderContext;
+import eu.pb4.placeholders.api.Placeholders;
+import eu.pb4.placeholders.api.parsers.TextParserV1;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
@@ -30,7 +34,8 @@ public class ReplyCommand {
         var message = StringArgumentType.getString(context, "message");
 
         if (!TellCommand.lastSender.containsKey(senderName)) {
-            source.sendFeedback(() -> Text.literal("You have no one to reply to.").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+            var playerContext = PlaceholderContext.of(context.getSource());
+            source.sendFeedback(() -> Placeholders.parseText(TextParserV1.DEFAULT.parseNode(RccServer.CONFIG.textFormats.commands.tell.noLastSenderReply), playerContext), false);
             return 1;
         }
 

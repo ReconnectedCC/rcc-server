@@ -119,7 +119,7 @@ public class AutoRestart {
         audience.playSound(sound, Sound.Emitter.self());
 
         var comp = bar.parseLabel(RccServer.CONFIG.autoRestart.restartChatMessage);
-        rcc.broadcastMessage(server, comp);
+        rcc.broadcastComponent(server, comp);
     }
 
     @Nullable
