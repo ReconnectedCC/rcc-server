@@ -3,11 +3,6 @@ package cc.reconnected.server.core.customChat;
 import cc.reconnected.server.RccServer;
 import cc.reconnected.server.util.Components;
 import eu.pb4.placeholders.api.PlaceholderContext;
-import eu.pb4.placeholders.api.Placeholders;
-import eu.pb4.placeholders.api.TextParserUtils;
-import eu.pb4.placeholders.api.node.TextNode;
-import eu.pb4.placeholders.api.parsers.PatternPlaceholderParser;
-import eu.pb4.placeholders.api.parsers.TextParserV1;
 import net.minecraft.network.message.MessageType;
 import net.minecraft.network.message.SignedMessage;
 import net.minecraft.registry.RegistryKeys;
@@ -21,7 +16,7 @@ public class CustomChatMessage {
         var playerUuid = message.link().sender();
         var player = RccServer.server.getPlayerManager().getPlayer(playerUuid);
 
-        Text messageText = Utils.formatChatMessage(message, player);
+        Text messageText = Components.chat(message, player);
 
         var playerContext = PlaceholderContext.of(player);
         var text = Components.parse(

@@ -1,21 +1,24 @@
 package cc.reconnected.server.commands.misc;
 
 import cc.reconnected.server.RccServer;
+import cc.reconnected.server.util.Components;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import eu.pb4.placeholders.api.PlaceholderContext;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Map;
 
-import static net.minecraft.server.command.CommandManager.*;
+import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
 
 public class NearCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
@@ -41,6 +44,7 @@ public class NearCommand {
     }
 
     private static int execute(CommandContext<ServerCommandSource> context, int range, ServerPlayerEntity sourcePlayer) {
+        var playerContext = PlaceholderContext.of(sourcePlayer);
         var list = new ArrayList<ClosePlayers>();
 
         var sourcePos = sourcePlayer.getPos();
@@ -48,35 +52,53 @@ public class NearCommand {
             var targetPos = targetPlayer.getPos();
             if (!sourcePlayer.getUuid().equals(targetPlayer.getUuid()) && sourcePos.isInRange(targetPos, range)) {
                 var distance = sourcePos.distanceTo(targetPos);
-                list.add(new ClosePlayers(targetPlayer.getDisplayName(), distance));
+                list.add(new ClosePlayers(targetPlayer, distance));
             }
         });
 
-        if(list.isEmpty()) {
-            context.getSource().sendFeedback(() -> Text.literal("There is no one near you.").formatted(Formatting.GOLD), false);
+        if (list.isEmpty()) {
+            context.getSource().sendFeedback(() -> Components.parse(
+                    RccServer.CONFIG.textFormats.commands.near.noOne,
+                    playerContext
+            ), false);
             return 1;
         }
 
         list.sort(Comparator.comparingDouble(ClosePlayers::distance));
 
-        var text = Text.empty().append(Text.literal("Nearest players: ").formatted(Formatting.GOLD));
-        var comma = Text.literal(", ").formatted(Formatting.GOLD);
+        var listText = Text.empty();
+        var comma = Components.parse(RccServer.CONFIG.textFormats.commands.near.comma);
         for (int i = 0; i < list.size(); i++) {
             var player = list.get(i);
             if (i > 0) {
-                text = text.append(comma);
+                listText = listText.append(comma);
             }
-            text = text.append(player.displayName)
-                    .append(" ")
-                    .append(Text.literal(String.format("(%.1fm)", player.distance)).formatted(Formatting.GREEN));
+            var placeholders = Map.of(
+                    "player", player.player.getDisplayName(),
+                    "distance", Text.of(String.format("%.1fm", player.distance))
+            );
+
+            var targetContext = PlaceholderContext.of(sourcePlayer);
+
+            listText = listText.append(Components.parse(
+                    RccServer.CONFIG.textFormats.commands.near.format,
+                    targetContext,
+                    placeholders
+            ));
         }
 
-        final var finalText = text;
-        context.getSource().sendFeedback(() -> finalText, false);
+        var placeholders = Map.of(
+                "playerList", (Text) listText
+        );
+        context.getSource().sendFeedback(() -> Components.parse(
+                RccServer.CONFIG.textFormats.commands.near.nearestPlayers,
+                playerContext,
+                placeholders
+        ), false);
 
         return 1;
     }
 
-    private record ClosePlayers(Text displayName, double distance) {
+    private record ClosePlayers(ServerPlayerEntity player, double distance) {
     }
 }

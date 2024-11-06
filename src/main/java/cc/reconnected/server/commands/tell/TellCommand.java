@@ -1,34 +1,24 @@
 package cc.reconnected.server.commands.tell;
 
 import cc.reconnected.server.RccServer;
-import cc.reconnected.server.parser.MarkdownParser;
+import cc.reconnected.server.util.Components;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import eu.pb4.placeholders.api.PlaceholderContext;
-import eu.pb4.placeholders.api.Placeholders;
-import eu.pb4.placeholders.api.node.TextNode;
-import eu.pb4.placeholders.api.parsers.PatternPlaceholderParser;
-import eu.pb4.placeholders.api.parsers.TextParserV1;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.minecraft.server.command.CommandManager.*;
+import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
 
 
 public class TellCommand {
@@ -74,17 +64,17 @@ public class TellCommand {
                 );
                 var sourceContext = PlaceholderContext.of(source);
 
-                source.sendFeedback(() -> Placeholders.parseText(
-                        TextParserV1.DEFAULT.parseNode(RccServer.CONFIG.textFormats.commands.tell.playerNotFound),
+                source.sendFeedback(() -> Components.parse(
+                        RccServer.CONFIG.textFormats.commands.tell.playerNotFound,
                         sourceContext,
-                        PatternPlaceholderParser.PREDEFINED_PLACEHOLDER_PATTERN, placeholders
+                        placeholders
                 ), false);
                 return;
             }
             targetDisplayName = targetPlayer.getDisplayName();
         }
 
-        var parsedMessage = MarkdownParser.defaultParser.parseNode(message).toText();
+        var parsedMessage = Components.chat(message, source);
 
         var serverContext = PlaceholderContext.of(source.getServer());
         var sourceContext = PlaceholderContext.of(source);
@@ -96,7 +86,7 @@ public class TellCommand {
         }
 
 
-        var you = TextParserV1.DEFAULT.parseNode(RccServer.CONFIG.textFormats.commands.tell.you).toText();
+        var you = Components.parse(RccServer.CONFIG.textFormats.commands.tell.you);
 
         var placeholdersToSource = Map.of(
                 "sourcePlayer", you,
@@ -116,12 +106,26 @@ public class TellCommand {
                 "message", parsedMessage
         );
 
-        var parser = TextParserV1.DEFAULT;
-
-        var sourceText = Placeholders.parseText(parser.parseNode(RccServer.CONFIG.textFormats.commands.tell.message), sourceContext, PatternPlaceholderParser.PREDEFINED_PLACEHOLDER_PATTERN, placeholdersToSource);
-        var targetText = Placeholders.parseText(parser.parseNode(RccServer.CONFIG.textFormats.commands.tell.message), targetContext, PatternPlaceholderParser.PREDEFINED_PLACEHOLDER_PATTERN, placeholdersToTarget);
-        var genericText = Placeholders.parseText(parser.parseNode(RccServer.CONFIG.textFormats.commands.tell.message), serverContext, PatternPlaceholderParser.PREDEFINED_PLACEHOLDER_PATTERN, placeholders);
-        var spyText = Placeholders.parseText(parser.parseNode(RccServer.CONFIG.textFormats.commands.tell.messageSpy), serverContext, PatternPlaceholderParser.PREDEFINED_PLACEHOLDER_PATTERN, placeholders);
+        var sourceText = Components.parse(
+                RccServer.CONFIG.textFormats.commands.tell.message,
+                sourceContext,
+                placeholdersToSource
+        );
+        var targetText = Components.parse(
+                RccServer.CONFIG.textFormats.commands.tell.message,
+                targetContext,
+                placeholdersToTarget
+        );
+        var genericText = Components.parse(
+                RccServer.CONFIG.textFormats.commands.tell.message,
+                serverContext,
+                placeholders
+        );
+        var spyText = Components.parse(
+                RccServer.CONFIG.textFormats.commands.tell.messageSpy,
+                serverContext,
+                placeholders
+        );
 
         lastSender.put(targetName, source.getName());
         lastSender.put(source.getName(), targetName);

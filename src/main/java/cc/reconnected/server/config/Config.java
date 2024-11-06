@@ -101,10 +101,15 @@ public class Config {
         public String leaveFormat = "<red>-</red> %player:displayname% <yellow>left!</yellow>";
         public String deathFormat = "<gray>\u2620 ${message}</gray>";
 
+        public String link = "<c:#8888ff><u>${label}</u></c>";
+        public String linkHover = "${url}";
+
         public Commands commands = new Commands();
 
         public static class Commands {
             public Common common = new Common();
+            public Back back = new Back();
+            public Near near = new Near();
             public Home home = new Home();
             public Spawn spawn = new Spawn();
             public TeleportRequest teleportRequest = new TeleportRequest();
@@ -119,12 +124,27 @@ public class Config {
                 public String refuse = "<red>Refuse</red>";
             }
 
+            public static class Back {
+                public String teleporting = "<gold>Teleporting to previous position...</gold>";
+                public String noPosition = "<red>There is no position to return back to.</red>";
+            }
+
+            public static class Near {
+                public String noOne = "<gold>There are no players near you.</gold>";
+                public String nearestPlayers = "<gold>Nearest players: ${playerList}</gold>";
+                public String format = "${player} <gold>(</gold><yellow>${distance}</yellow><gold>)</gold>";
+                public String comma = "<gold>, </gold>";
+            }
+
             public static class Home {
                 public String teleporting = "<gold>Teleporting to <yellow>${home}</yellow></gold>";
                 public String homeExists = "<gold>You already have set this home.</gold>\n ${forceSetButton}";
                 public String homeNotFound = "<red>The home <yellow>${home}</yellow> does not exist!</red>";
                 public String maxHomesReached = "<red>You have reached the maximum amount of homes!</red>";
                 public String homeSetSuccess = "<gold>New home <yellow>${home}</yellow> set!</gold>";
+                public String forceSetLabel = "<yellow>Force set home</yellow>";
+                public String forceSetHover = "Click to force setting new home";
+                public String homeDeleted = "<gold>Home <yellow>${home}</yellow> deleted!</gold>";
             }
 
             public static class Spawn {
@@ -132,12 +152,20 @@ public class Config {
             }
 
             public static class TeleportRequest {
+                public String teleporting = "<gold>Teleporting...</gold>";
                 public String playerNotFound = "<red>Player <yellow>${targetPlayer}</yellow> not found!</red>";
                 public String requestSent = "<gold>Teleport request sent.</gold>";
                 public String pendingTeleport = "${requesterPlayer} <gold>requested to teleport to you.</gold>\n ${acceptButton} ${refuseButton}";
                 public String pendingTeleportHere = "${requesterPlayer} <gold>requested you to teleport to them.</gold>\n ${acceptButton} ${refuseButton}";
                 public String hoverAccept = "Click to accept request";
                 public String hoverRefuse = "Click to refuse request";
+                public String noPending = "<gold>There are no pending teleport requests for you.</gold>";
+                public String unavailable = "<red>This requested expired or is no longer available.</red>";
+                public String playerUnavailable = "<red>The other player is no longer available.</red>";
+                public String requestAcceptedResult = "<green>Teleport request accepted.</green>";
+                public String requestRefusedResult = "<gold>Teleport request refused.</gold>";
+                public String requestAccepted = "<green>${player} accepted your teleport request!</green>";
+                public String requestRefused = "<gold>${player} refused your teleport request!</gold>";
             }
 
             public static class Tell {

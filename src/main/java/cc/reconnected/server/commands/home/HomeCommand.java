@@ -6,10 +6,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import eu.pb4.placeholders.api.PlaceholderContext;
-import eu.pb4.placeholders.api.Placeholders;
-import eu.pb4.placeholders.api.node.TextNode;
-import eu.pb4.placeholders.api.parsers.PatternPlaceholderParser;
-import eu.pb4.placeholders.api.parsers.TextParserV1;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
@@ -19,7 +15,8 @@ import net.minecraft.text.Text;
 
 import java.util.Map;
 
-import static net.minecraft.server.command.CommandManager.*;
+import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
 
 public class HomeCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
@@ -55,7 +52,8 @@ public class HomeCommand {
 
         if (!homes.containsKey(name)) {
             context.getSource().sendFeedback(() ->
-                    Components.parse(RccServer.CONFIG.textFormats.commands.home.homeNotFound,
+                    Components.parse(
+                            RccServer.CONFIG.textFormats.commands.home.homeNotFound,
                             playerContext,
                             placeholders
                     ), false);
@@ -64,7 +62,8 @@ public class HomeCommand {
         }
 
         context.getSource().sendFeedback(() ->
-                Components.parse(RccServer.CONFIG.textFormats.commands.home.teleporting,
+                Components.parse(
+                        RccServer.CONFIG.textFormats.commands.home.teleporting,
                         playerContext,
                         placeholders
                 ), false);

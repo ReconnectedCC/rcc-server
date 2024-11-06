@@ -1,16 +1,19 @@
 package cc.reconnected.server.commands.home;
 
 import cc.reconnected.server.RccServer;
+import cc.reconnected.server.util.Components;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import eu.pb4.placeholders.api.PlaceholderContext;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+
+import java.util.Map;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -41,23 +44,29 @@ public class DeleteHomeCommand {
         var player = context.getSource().getPlayer();
         var playerState = RccServer.state.getPlayerState(player.getUuid());
         var homes = playerState.homes;
+        var playerContext = PlaceholderContext.of(context.getSource().getPlayer());
+
+        var placeholders = Map.of(
+                "home", Text.of(name)
+        );
 
         if (!homes.containsKey(name)) {
-            context.getSource().sendFeedback(() -> Text.literal("The home ")
-                    .append(Text.literal(name).formatted(Formatting.GOLD))
-                    .append(" does not exist!")
-                    .formatted(Formatting.RED), false);
+            context.getSource().sendFeedback(() -> Components.parse(
+                    RccServer.CONFIG.textFormats.commands.home.homeNotFound,
+                    playerContext,
+                    placeholders
+            ), false);
             return 1;
         }
 
         homes.remove(name);
         RccServer.state.savePlayerState(player.getUuid(), playerState);
 
-        context.getSource().sendFeedback(() -> Text
-                .literal("Home ")
-                .append(Text.literal(name).formatted(Formatting.GOLD))
-                .append(" deleted!")
-                .formatted(Formatting.GREEN), false);
+        context.getSource().sendFeedback(() -> Components.parse(
+                RccServer.CONFIG.textFormats.commands.home.homeDeleted,
+                playerContext,
+                placeholders
+        ), false);
 
         return 1;
     }

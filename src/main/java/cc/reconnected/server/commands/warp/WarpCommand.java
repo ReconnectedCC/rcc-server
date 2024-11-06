@@ -1,18 +1,22 @@
 package cc.reconnected.server.commands.warp;
 
 import cc.reconnected.server.RccServer;
+import cc.reconnected.server.util.Components;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import eu.pb4.placeholders.api.PlaceholderContext;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
-import static net.minecraft.server.command.CommandManager.*;
+import java.util.Map;
+
+import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
 
 public class WarpCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
@@ -39,20 +43,23 @@ public class WarpCommand {
         var player = context.getSource().getPlayer();
         var serverState = RccServer.state.getServerState();
         var warps = serverState.warps;
+        var playerContext = PlaceholderContext.of(player);
 
         if (!warps.containsKey(name)) {
-            context.getSource().sendFeedback(() -> Text.literal("The warp ")
-                    .append(Text.literal(name).formatted(Formatting.GOLD))
-                    .append(" does not exist!")
-                    .formatted(Formatting.RED), false);
+            context.getSource().sendFeedback(() -> Components.parse(
+                    RccServer.CONFIG.textFormats.commands.warp.warpNotFound,
+                    playerContext
+            ), false);
             return 1;
         }
 
-        context.getSource().sendFeedback(() -> Text
-                .literal("Teleporting to ")
-                .append(Text.literal(name).formatted(Formatting.GREEN))
-                .append("...")
-                .formatted(Formatting.GOLD), false);
+        context.getSource().sendFeedback(() -> Components.parse(
+                RccServer.CONFIG.textFormats.commands.warp.teleporting,
+                playerContext,
+                Map.of(
+                        "warp", Text.of(name)
+                )
+        ), false);
 
         var warpPosition = warps.get(name);
         warpPosition.teleport(player);

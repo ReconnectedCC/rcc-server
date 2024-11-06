@@ -25,7 +25,8 @@ import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static net.minecraft.server.command.CommandManager.*;
+import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
 
 public class TimeBarCommand {
     private static final ConcurrentHashMap<UUID, BarCommand> runningBars = new ConcurrentHashMap<>();

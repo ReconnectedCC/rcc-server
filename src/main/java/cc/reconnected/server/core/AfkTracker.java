@@ -8,7 +8,6 @@ import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.PlaceholderResult;
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.TextParserUtils;
-import eu.pb4.placeholders.api.parsers.TextParserV1;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
@@ -20,7 +19,6 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -58,7 +56,7 @@ public class AfkTracker {
             var playerContext = PlaceholderContext.of(player);
 
             RccServer.getInstance().broadcast(Components.parse(
-                    RccServer.CONFIG.textFormats.commands.afk.returnAfk,
+                    RccServer.CONFIG.textFormats.commands.afk.goneAfk,
                     playerContext
             ));
         });
@@ -69,7 +67,7 @@ public class AfkTracker {
             var playerContext = PlaceholderContext.of(player);
 
             RccServer.getInstance().broadcast(Components.parse(
-                    RccServer.CONFIG.textFormats.commands.afk.goneAfk,
+                    RccServer.CONFIG.textFormats.commands.afk.returnAfk,
                     playerContext
             ));
         });

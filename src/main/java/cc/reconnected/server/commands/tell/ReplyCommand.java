@@ -1,21 +1,18 @@
 package cc.reconnected.server.commands.tell;
 
 import cc.reconnected.server.RccServer;
+import cc.reconnected.server.util.Components;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import eu.pb4.placeholders.api.PlaceholderContext;
-import eu.pb4.placeholders.api.Placeholders;
-import eu.pb4.placeholders.api.parsers.TextParserV1;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
-import static net.minecraft.server.command.CommandManager.*;
+import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
 
 
 public class ReplyCommand {
@@ -35,7 +32,10 @@ public class ReplyCommand {
 
         if (!TellCommand.lastSender.containsKey(senderName)) {
             var playerContext = PlaceholderContext.of(context.getSource());
-            source.sendFeedback(() -> Placeholders.parseText(TextParserV1.DEFAULT.parseNode(RccServer.CONFIG.textFormats.commands.tell.noLastSenderReply), playerContext), false);
+            source.sendFeedback(() -> Components.parse(
+                    RccServer.CONFIG.textFormats.commands.tell.noLastSenderReply,
+                    playerContext
+            ), false);
             return 1;
         }
 
