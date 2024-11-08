@@ -9,6 +9,8 @@ import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.NodeParser;
 import eu.pb4.placeholders.api.parsers.PatternPlaceholderParser;
 import eu.pb4.placeholders.api.parsers.TextParserV1;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -107,7 +109,12 @@ public class Components {
     }
 
     public static Text chat(String message, boolean allowAdvancedChatFormat) {
-        var enableMarkdown = RccServer.CONFIG.textFormats.enableChatMarkdown;
+        var enableMarkdown = RccServer.CONFIG.chat.enableChatMarkdown;
+
+        for(var repl : RccServer.CONFIG.chat.replacements.entrySet() ) {
+            message = message.replace(repl.getKey(), repl.getValue());
+        }
+
         if(!allowAdvancedChatFormat && !enableMarkdown) {
             return Text.of(message);
         }

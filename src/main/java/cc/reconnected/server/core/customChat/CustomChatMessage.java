@@ -16,6 +16,15 @@ public class CustomChatMessage {
         var playerUuid = message.link().sender();
         var player = RccServer.server.getPlayerManager().getPlayer(playerUuid);
 
+        var text = getFormattedMessage(message, player);
+
+        var msgType = RccServer.server.getRegistryManager().get(RegistryKeys.MESSAGE_TYPE).getOrThrow(RccServer.CHAT_TYPE);
+        var newParams = new MessageType.Parameters(msgType, text, null);
+
+        receiver.networkHandler.sendChatMessage(message, newParams);
+    }
+
+    public static Text getFormattedMessage(SignedMessage message, ServerPlayerEntity player) {
         Text messageText = Components.chat(message, player);
 
         var playerContext = PlaceholderContext.of(player);
@@ -26,10 +35,6 @@ public class CustomChatMessage {
                         "message", messageText
                 )
         );
-
-        var msgType = RccServer.server.getRegistryManager().get(RegistryKeys.MESSAGE_TYPE).getOrThrow(RccServer.CHAT_TYPE);
-        var newParams = new MessageType.Parameters(msgType, text, null);
-
-        receiver.networkHandler.sendChatMessage(message, newParams);
+        return text;
     }
 }

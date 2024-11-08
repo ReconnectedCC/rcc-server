@@ -1,7 +1,9 @@
 package cc.reconnected.server.config;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Config {
     Config() {
@@ -14,6 +16,7 @@ public class Config {
     public CustomTabList customTabList = new CustomTabList();
     public NearCommand nearCommand = new NearCommand();
     public AutoRestart autoRestart = new AutoRestart();
+    public Chat chat = new Chat();
     public TextFormats textFormats = new TextFormats();
 
     public static class HttpApi {
@@ -83,11 +86,16 @@ public class Config {
         ));
     }
 
+    public static class Chat {
+        public boolean enableChatMarkdown = true;
+        public HashMap<String, String> replacements = new HashMap<>(Map.of(
+                ":shrug:", "¯\\\\_(ツ)_/¯"
+        ));
+    }
+
     public static class TextFormats {
         public record NameFormat(String group, String format) {
         }
-
-        public boolean enableChatMarkdown = true;
 
         public ArrayList<NameFormat> nameFormats = new ArrayList<>(List.of(
                 new NameFormat("admin", "<red>%player:name%</red>"),
