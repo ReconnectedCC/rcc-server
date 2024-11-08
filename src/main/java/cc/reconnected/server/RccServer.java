@@ -85,6 +85,7 @@ public class RccServer implements ModInitializer {
     }
 
     public static final RegistryKey<MessageType> CHAT_TYPE = RegistryKey.of(RegistryKeys.MESSAGE_TYPE, new Identifier(MOD_ID, "chat"));
+    private static boolean warnedAboutUnsignedMessages = false;
 
     @Override
     public void onInitialize() {
@@ -194,6 +195,22 @@ public class RccServer implements ModInitializer {
         for (var pl : server.getPlayerManager().getPlayerList()) {
             pl.sendMessage(formatted);
         }
+    }
+
+    public static void warnUnsignedMessages() {
+        if (warnedAboutUnsignedMessages)
+            return;
+        warnedAboutUnsignedMessages = true;
+
+        LOGGER.warn(
+                """
+                        !!! --- WARNING --- !!!
+                        Cannot retrieve message sender UUID!
+                        
+                        If you are using FabricProxy-Lite, consider disabling
+                        the `hackMessageChain` configuration!
+                        """
+        );
     }
 
 }
