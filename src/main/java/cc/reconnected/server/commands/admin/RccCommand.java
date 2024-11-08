@@ -5,15 +5,13 @@ import cc.reconnected.server.api.events.RccEvents;
 import cc.reconnected.server.config.ConfigManager;
 import com.mojang.brigadier.CommandDispatcher;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class RccCommand {
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         var rootCommand = literal("rcc")
                 .requires(Permissions.require("rcc.command.rcc", 3))
                 .then(literal("reload")

@@ -9,11 +9,9 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.UuidArgumentType;
 import net.minecraft.entity.boss.BossBar;
-import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -31,7 +29,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class TimeBarCommand {
     private static final ConcurrentHashMap<UUID, BarCommand> runningBars = new ConcurrentHashMap<>();
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         var rootCommand = literal("timebar")
                 .requires(Permissions.require("rcc.command.timebar", 3))
                 .then(literal("start")

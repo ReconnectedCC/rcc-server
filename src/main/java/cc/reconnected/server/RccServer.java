@@ -98,37 +98,37 @@ public class RccServer implements ModInitializer {
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> this.adventure = null);
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            RccCommand.register(dispatcher, registryAccess, environment);
+            RccCommand.register(dispatcher);
 
-            AfkCommand.register(dispatcher, registryAccess, environment);
+            AfkCommand.register(dispatcher);
 
-            TellCommand.register(dispatcher, registryAccess, environment);
-            ReplyCommand.register(dispatcher, registryAccess, environment);
+            TellCommand.register(dispatcher);
+            ReplyCommand.register(dispatcher);
 
-            TeleportAskCommand.register(dispatcher, registryAccess, environment);
-            TeleportAskHereCommand.register(dispatcher, registryAccess, environment);
-            TeleportAcceptCommand.register(dispatcher, registryAccess, environment);
-            TeleportDenyCommand.register(dispatcher, registryAccess, environment);
-            BackCommand.register(dispatcher, registryAccess, environment);
+            TeleportAskCommand.register(dispatcher);
+            TeleportAskHereCommand.register(dispatcher);
+            TeleportAcceptCommand.register(dispatcher);
+            TeleportDenyCommand.register(dispatcher);
+            BackCommand.register(dispatcher);
 
-            FlyCommand.register(dispatcher, registryAccess, environment);
-            GodCommand.register(dispatcher, registryAccess, environment);
+            FlyCommand.register(dispatcher);
+            GodCommand.register(dispatcher);
 
-            SetSpawnCommand.register(dispatcher, registryAccess, environment);
-            SpawnCommand.register(dispatcher, registryAccess, environment);
+            SetSpawnCommand.register(dispatcher);
+            SpawnCommand.register(dispatcher);
 
-            HomeCommand.register(dispatcher, registryAccess, environment);
-            SetHomeCommand.register(dispatcher, registryAccess, environment);
-            DeleteHomeCommand.register(dispatcher, registryAccess, environment);
+            HomeCommand.register(dispatcher);
+            SetHomeCommand.register(dispatcher);
+            DeleteHomeCommand.register(dispatcher);
 
-            WarpCommand.register(dispatcher, registryAccess, environment);
-            SetWarpCommand.register(dispatcher, registryAccess, environment);
-            DeleteWarpCommand.register(dispatcher, registryAccess, environment);
+            WarpCommand.register(dispatcher);
+            SetWarpCommand.register(dispatcher);
+            DeleteWarpCommand.register(dispatcher);
 
-            TimeBarCommand.register(dispatcher, registryAccess, environment);
-            RestartCommand.register(dispatcher, registryAccess, environment);
+            TimeBarCommand.register(dispatcher);
+            RestartCommand.register(dispatcher);
 
-            NearCommand.register(dispatcher, registryAccess, environment);
+            NearCommand.register(dispatcher);
         });
 
         AfkTracker.register();
