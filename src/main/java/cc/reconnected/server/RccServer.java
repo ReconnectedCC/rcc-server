@@ -2,30 +2,44 @@ package cc.reconnected.server;
 
 import cc.reconnected.server.api.events.RccEvents;
 import cc.reconnected.server.commands.admin.*;
-import cc.reconnected.server.commands.home.*;
-import cc.reconnected.server.commands.misc.*;
-import cc.reconnected.server.commands.spawn.*;
-import cc.reconnected.server.commands.teleport.*;
-import cc.reconnected.server.commands.tell.*;
-import cc.reconnected.server.commands.warp.*;
+import cc.reconnected.server.commands.home.DeleteHomeCommand;
+import cc.reconnected.server.commands.home.HomeCommand;
+import cc.reconnected.server.commands.home.SetHomeCommand;
+import cc.reconnected.server.commands.misc.AfkCommand;
+import cc.reconnected.server.commands.teleport.BackCommand;
+import cc.reconnected.server.commands.misc.NearCommand;
+import cc.reconnected.server.commands.spawn.SetSpawnCommand;
+import cc.reconnected.server.commands.spawn.SpawnCommand;
+import cc.reconnected.server.commands.teleport.TeleportAcceptCommand;
+import cc.reconnected.server.commands.teleport.TeleportAskCommand;
+import cc.reconnected.server.commands.teleport.TeleportAskHereCommand;
+import cc.reconnected.server.commands.teleport.TeleportDenyCommand;
+import cc.reconnected.server.commands.tell.ReplyCommand;
+import cc.reconnected.server.commands.tell.TellCommand;
+import cc.reconnected.server.commands.warp.DeleteWarpCommand;
+import cc.reconnected.server.commands.warp.SetWarpCommand;
+import cc.reconnected.server.commands.warp.WarpCommand;
 import cc.reconnected.server.config.Config;
 import cc.reconnected.server.config.ConfigManager;
 import cc.reconnected.server.core.*;
+import cc.reconnected.server.core.customChat.CustomChatMessage;
 import cc.reconnected.server.data.StateManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-
+import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.minecraft.network.message.MessageType;
+import net.minecraft.network.message.SignedMessage;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.WorldSavePath;
 import org.slf4j.Logger;
@@ -84,38 +98,37 @@ public class RccServer implements ModInitializer {
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> this.adventure = null);
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            RccCommand.register(dispatcher, registryAccess, environment);
+            RccCommand.register(dispatcher);
 
-            AfkCommand.register(dispatcher, registryAccess, environment);
+            AfkCommand.register(dispatcher);
 
-            TellCommand.register(dispatcher, registryAccess, environment);
-            ReplyCommand.register(dispatcher, registryAccess, environment);
+            TellCommand.register(dispatcher);
+            ReplyCommand.register(dispatcher);
 
-            TeleportAskCommand.register(dispatcher, registryAccess, environment);
-            TeleportAskHereCommand.register(dispatcher, registryAccess, environment);
-            TeleportAcceptCommand.register(dispatcher, registryAccess, environment);
-            TeleportDenyCommand.register(dispatcher, registryAccess, environment);
+            TeleportAskCommand.register(dispatcher);
+            TeleportAskHereCommand.register(dispatcher);
+            TeleportAcceptCommand.register(dispatcher);
+            TeleportDenyCommand.register(dispatcher);
+            BackCommand.register(dispatcher);
 
-            BackCommand.register(dispatcher, registryAccess, environment);
+            FlyCommand.register(dispatcher);
+            GodCommand.register(dispatcher);
 
-            FlyCommand.register(dispatcher, registryAccess, environment);
-            GodCommand.register(dispatcher, registryAccess, environment);
+            SetSpawnCommand.register(dispatcher);
+            SpawnCommand.register(dispatcher);
 
-            SetSpawnCommand.register(dispatcher, registryAccess, environment);
-            SpawnCommand.register(dispatcher, registryAccess, environment);
+            HomeCommand.register(dispatcher);
+            SetHomeCommand.register(dispatcher);
+            DeleteHomeCommand.register(dispatcher);
 
-            HomeCommand.register(dispatcher, registryAccess, environment);
-            SetHomeCommand.register(dispatcher, registryAccess, environment);
-            DeleteHomeCommand.register(dispatcher, registryAccess, environment);
+            WarpCommand.register(dispatcher);
+            SetWarpCommand.register(dispatcher);
+            DeleteWarpCommand.register(dispatcher);
 
-            WarpCommand.register(dispatcher, registryAccess, environment);
-            SetWarpCommand.register(dispatcher, registryAccess, environment);
-            DeleteWarpCommand.register(dispatcher, registryAccess, environment);
+            TimeBarCommand.register(dispatcher);
+            RestartCommand.register(dispatcher);
 
-            TimeBarCommand.register(dispatcher, registryAccess, environment);
-            RestartCommand.register(dispatcher, registryAccess, environment);
-
-            NearCommand.register(dispatcher,  registryAccess, environment);
+            NearCommand.register(dispatcher);
         });
 
         AfkTracker.register();
@@ -156,9 +169,31 @@ public class RccServer implements ModInitializer {
         });
     }
 
-    public void broadcastMessage(MinecraftServer server, Component message) {
+    public void broadcastComponent(MinecraftServer server, Component message) {
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             player.sendMessage(message);
         }
     }
+
+    public void broadcast(Text text) {
+        server.getPlayerManager().broadcast(text, false);
+    }
+
+    public void sendChatAsPlayer(ServerPlayerEntity player, String message) {
+        var msgType = server.getRegistryManager().get(RegistryKeys.MESSAGE_TYPE).getOrThrow(MessageType.CHAT);
+        var signedMessage = SignedMessage.ofUnsigned(player.getUuid(), message);
+        var pars = new MessageType.Parameters(msgType, Text.of(message), Text.of(message));
+
+        var allowed = ServerMessageEvents.ALLOW_CHAT_MESSAGE.invoker().allowChatMessage(signedMessage, player, pars);
+        if (!allowed)
+            return;
+
+        ServerMessageEvents.CHAT_MESSAGE.invoker().onChatMessage(signedMessage, player, pars);
+
+        var formatted = CustomChatMessage.getFormattedMessage(signedMessage, player);
+        for (var pl : server.getPlayerManager().getPlayerList()) {
+            pl.sendMessage(formatted);
+        }
+    }
+
 }

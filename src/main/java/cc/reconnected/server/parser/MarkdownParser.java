@@ -20,11 +20,13 @@ public class MarkdownParser {
     public static final NodeParser defaultParser = createParser(ALL);
 
     public static NodeParser createParser(MarkdownFormat[] capabilities) {
-        return new MarkdownLiteParserV1(
+        var mdParser =  new MarkdownLiteParserV1(
                 MarkdownComponentParser::spoilerFormatting,
                 MarkdownComponentParser::quoteFormatting,
                 MarkdownComponentParser::urlFormatting,
                 capabilities
         );
+
+        return NodeParser.merge(mdParser, new LinkParser());
     }
 }

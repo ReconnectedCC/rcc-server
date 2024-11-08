@@ -1,25 +1,23 @@
 package cc.reconnected.server.commands.teleport;
 
+import cc.reconnected.server.RccServer;
 import cc.reconnected.server.core.TeleportTracker;
 import cc.reconnected.server.util.Components;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.command.CommandRegistryAccess;
+import eu.pb4.placeholders.api.PlaceholderContext;
 import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+
+import java.util.Map;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class TeleportAskHereCommand {
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         var node = dispatcher.register(literal("tpahere")
                 .then(argument("player", StringArgumentType.word())
                         .suggests((context, builder) -> {
@@ -48,8 +46,16 @@ public class TeleportAskHereCommand {
         var targetName = StringArgumentType.getString(context, "player");
         var playerManager = server.getPlayerManager();
         var target = playerManager.getPlayer(targetName);
+        var playerContext = PlaceholderContext.of(player);
         if (target == null) {
-            source.sendFeedback(() -> Text.literal("Player \"" + targetName + "\" not found!").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+            var placeholders = Map.of(
+                    "targetPlayer", Text.of(targetName)
+            );
+            source.sendFeedback(() -> Components.parse(
+                    RccServer.CONFIG.textFormats.commands.teleportRequest.playerNotFound,
+                    playerContext,
+                    placeholders
+            ), false);
             return;
         }
 
@@ -57,17 +63,28 @@ public class TeleportAskHereCommand {
         var targetRequests = TeleportTracker.teleportRequests.get(target.getUuid());
         targetRequests.addLast(request);
 
-        var requestMessage = Component.empty()
-                .append(player.getDisplayName())
-                .appendSpace()
-                .append(Component.text("requested you to teleport to them.", NamedTextColor.GOLD))
-                .appendNewline().appendSpace()
-                .append(Components.makeButton(Component.text("Accept", NamedTextColor.GREEN), Component.text("Click to accept request"), "/tpaccept " + request.requestId))
-                .appendSpace()
-                .append(Components.makeButton(Component.text("Refuse", NamedTextColor.RED), Component.text("Click to refuse request"), "/tpdeny " + request.requestId));
+        var targetContext = PlaceholderContext.of(target);
+        var placeholders = Map.of(
+                "requesterPlayer", player.getDisplayName(),
+                "acceptButton", Components.button(
+                        RccServer.CONFIG.textFormats.commands.common.accept,
+                        RccServer.CONFIG.textFormats.commands.teleportRequest.hoverAccept,
+                        "/tpaccept " + request.requestId),
+                "refuseButton", Components.button(
+                        RccServer.CONFIG.textFormats.commands.common.refuse,
+                        RccServer.CONFIG.textFormats.commands.teleportRequest.hoverRefuse,
+                        "/tpdeny " + request.requestId)
+        );
 
-        target.sendMessage(requestMessage);
+        target.sendMessage(Components.parse(
+                RccServer.CONFIG.textFormats.commands.teleportRequest.pendingTeleportHere,
+                targetContext,
+                placeholders
+        ));
 
-        source.sendFeedback(() -> Text.literal("Teleport request sent.").setStyle(Style.EMPTY.withColor(Formatting.GREEN)), false);
+        source.sendFeedback(() -> Components.parse(
+                RccServer.CONFIG.textFormats.commands.teleportRequest.requestSent,
+                playerContext
+        ), false);
     }
 }

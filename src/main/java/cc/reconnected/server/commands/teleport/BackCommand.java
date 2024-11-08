@@ -1,18 +1,18 @@
-package cc.reconnected.server.commands.misc;
+package cc.reconnected.server.commands.teleport;
 
+import cc.reconnected.server.RccServer;
 import cc.reconnected.server.core.BackTracker;
+import cc.reconnected.server.util.Components;
 import com.mojang.brigadier.CommandDispatcher;
+import eu.pb4.placeholders.api.PlaceholderContext;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class BackCommand {
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         var rootCommand = literal("back")
                 .requires(Permissions.require("rcc.command.back", true))
                 .executes(context -> {
@@ -22,14 +22,21 @@ public class BackCommand {
                     }
 
                     var player = context.getSource().getPlayer();
+                    var playerContext = PlaceholderContext.of(player);
 
                     var lastPosition = BackTracker.lastPlayerPositions.get(player.getUuid());
                     if (lastPosition == null) {
-                        context.getSource().sendFeedback(() -> Text.literal("There is no position to return back to.").formatted(Formatting.RED), false);
+                        context.getSource().sendFeedback(() -> Components.parse(
+                                RccServer.CONFIG.textFormats.commands.back.noPosition,
+                                playerContext
+                        ), false);
                         return 1;
                     }
 
-                    context.getSource().sendFeedback(() -> Text.literal("Teleporting to previous position...").formatted(Formatting.GOLD), false);
+                    context.getSource().sendFeedback(() -> Components.parse(
+                            RccServer.CONFIG.textFormats.commands.back.teleporting,
+                            playerContext
+                    ), false);
                     lastPosition.teleport(player);
 
                     return 1;

@@ -1,15 +1,8 @@
 package cc.reconnected.server.core.customChat;
 
 import cc.reconnected.server.RccServer;
-import cc.reconnected.server.parser.MarkdownParser;
 import cc.reconnected.server.util.Components;
-import eu.pb4.placeholders.api.Placeholders;
-import eu.pb4.placeholders.api.TextParserUtils;
-import eu.pb4.placeholders.api.node.TextNode;
-import eu.pb4.placeholders.api.parsers.PatternPlaceholderParser;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import eu.pb4.placeholders.api.PlaceholderContext;
 import net.minecraft.network.message.MessageType;
 import net.minecraft.network.message.SignedMessage;
 import net.minecraft.registry.RegistryKeys;
@@ -19,26 +12,29 @@ import net.minecraft.text.Text;
 import java.util.Map;
 
 public class CustomChatMessage {
-    private static final MiniMessage miniMessage = MiniMessage.miniMessage();
-
     public static void sendChatMessage(ServerPlayerEntity receiver, SignedMessage message, MessageType.Parameters params) {
         var playerUuid = message.link().sender();
         var player = RccServer.server.getPlayerManager().getPlayer(playerUuid);
 
-        Text messageText = Utils.formatChatMessage(message, player);
-
-        var placeholders = Map.of(
-                "message", messageText,
-                "player", player.getDisplayName()
-        );
-
-
-        var format = TextParserUtils.formatText(RccServer.CONFIG.textFormats.chatFormat);
-        var text = Placeholders.parseText(format, PatternPlaceholderParser.PREDEFINED_PLACEHOLDER_PATTERN, placeholders);
+        var text = getFormattedMessage(message, player);
 
         var msgType = RccServer.server.getRegistryManager().get(RegistryKeys.MESSAGE_TYPE).getOrThrow(RccServer.CHAT_TYPE);
         var newParams = new MessageType.Parameters(msgType, text, null);
 
         receiver.networkHandler.sendChatMessage(message, newParams);
+    }
+
+    public static Text getFormattedMessage(SignedMessage message, ServerPlayerEntity player) {
+        Text messageText = Components.chat(message, player);
+
+        var playerContext = PlaceholderContext.of(player);
+        var text = Components.parse(
+                RccServer.CONFIG.textFormats.chatFormat,
+                playerContext,
+                Map.of(
+                        "message", messageText
+                )
+        );
+        return text;
     }
 }

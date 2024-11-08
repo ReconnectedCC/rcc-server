@@ -1,22 +1,23 @@
 package cc.reconnected.server.commands.teleport;
 
+import cc.reconnected.server.RccServer;
 import cc.reconnected.server.core.TeleportTracker;
+import cc.reconnected.server.util.Components;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.command.CommandRegistryAccess;
+import eu.pb4.placeholders.api.PlaceholderContext;
 import net.minecraft.command.argument.UuidArgumentType;
-import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+
+import java.util.Map;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class TeleportDenyCommand {
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         var node = dispatcher.register(literal("tpdeny")
                 .executes(context -> {
                     if (!context.getSource().isExecutedByPlayer()) {
@@ -24,13 +25,18 @@ public class TeleportDenyCommand {
                         return 1;
                     }
 
-                    var playerUuid = context.getSource().getPlayer().getUuid();
+                    var player = context.getSource().getPlayer();
+                    var playerUuid = player.getUuid();
                     var playerRequests = TeleportTracker.teleportRequests.get(playerUuid);
+                    var playerContext = PlaceholderContext.of(player);
 
                     var request = playerRequests.pollLast();
 
                     if (request == null) {
-                        context.getSource().sendFeedback(() -> Text.literal("You have no pending teleport requests.").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+                        context.getSource().sendFeedback(() -> Components.parse(
+                                RccServer.CONFIG.textFormats.commands.teleportRequest.noPending,
+                                playerContext
+                        ), false);
                         return 1;
                     }
 
@@ -45,13 +51,18 @@ public class TeleportDenyCommand {
                                 return 1;
                             }
 
+                            var player = context.getSource().getPlayer();
                             var uuid = UuidArgumentType.getUuid(context, "uuid");
-                            var playerUuid = context.getSource().getPlayer().getUuid();
+                            var playerUuid = player.getUuid();
                             var playerRequests = TeleportTracker.teleportRequests.get(playerUuid);
+                            var playerContext = PlaceholderContext.of(player);
 
                             var request = playerRequests.stream().filter(req -> req.requestId.equals(uuid)).findFirst().orElse(null);
                             if (request == null) {
-                                context.getSource().sendFeedback(() -> Text.literal("This request expired or is no longer available.").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+                                context.getSource().sendFeedback(() -> Components.parse(
+                                        RccServer.CONFIG.textFormats.commands.teleportRequest.unavailable,
+                                        playerContext
+                                ), false);
                                 return 1;
                             }
 
@@ -69,8 +80,8 @@ public class TeleportDenyCommand {
         request.expire();
 
         var player = source.getPlayer();
-
         var playerManager = context.getSource().getServer().getPlayerManager();
+        var playerContext = PlaceholderContext.of(player);
 
         ServerPlayerEntity otherPlayer = null;
         if (player.getUuid().equals(request.target)) {
@@ -80,8 +91,17 @@ public class TeleportDenyCommand {
         }
 
         if (otherPlayer != null) {
-            otherPlayer.sendMessage(Text.empty().append(player.getDisplayName()).append(Text.literal(" denied your teleport request.").formatted(Formatting.RED)));
+            var otherContext = PlaceholderContext.of(otherPlayer);
+            otherPlayer.sendMessage(Components.parse(
+                    RccServer.CONFIG.textFormats.commands.teleportRequest.requestRefused,
+                    otherContext,
+                    Map.of("player", player.getDisplayName())
+            ), false);
         }
-        context.getSource().sendFeedback(() -> Text.literal("You denied the teleport request.").formatted(Formatting.GOLD), false);
+
+        context.getSource().sendFeedback(() -> Components.parse(
+                RccServer.CONFIG.textFormats.commands.teleportRequest.requestRefusedResult,
+                playerContext
+        ), false);
     }
 }
