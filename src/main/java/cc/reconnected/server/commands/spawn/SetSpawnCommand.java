@@ -15,12 +15,7 @@ public class SetSpawnCommand {
         var rootCommand = literal("setspawn")
                 .requires(Permissions.require("rcc.command.setspawn", 3))
                 .executes(context -> {
-                    if (!context.getSource().isExecutedByPlayer()) {
-                        context.getSource().sendFeedback(() -> Text.of("This command can only be executed by players!"), false);
-                        return 1;
-                    }
-
-                    var player = context.getSource().getPlayer();
+                    var player = context.getSource().getPlayerOrThrow();
                     var spawnPosition = new ServerPosition(player);
 
                     var serverState = RccServer.state.getServerState();

@@ -18,11 +18,7 @@ public class GodCommand {
         var rootCommand = literal("god")
                 .requires(Permissions.require("rcc.command.god", 3))
                 .executes(context -> {
-                    if (!context.getSource().isExecutedByPlayer()) {
-                        context.getSource().sendFeedback(() -> Text.of("This command can only be executed by players!"), false);
-                        return 1;
-                    }
-                    var player = context.getSource().getPlayer();
+                    var player = context.getSource().getPlayerOrThrow();
                     context.getSource().sendFeedback(() -> toggleGod(player), true);
 
                     return 1;

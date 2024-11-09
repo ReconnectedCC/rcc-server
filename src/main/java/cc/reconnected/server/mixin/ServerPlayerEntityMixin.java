@@ -9,7 +9,6 @@ import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.parsers.NodeParser;
 import eu.pb4.placeholders.api.parsers.TextParserV1;
 import net.minecraft.entity.damage.DamageTracker;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.PositionFlag;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;

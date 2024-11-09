@@ -7,6 +7,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.server.command.ServerCommandSource;
@@ -36,12 +37,8 @@ public class SetHomeCommand {
         dispatcher.register(rootCommand);
     }
 
-    private static int execute(CommandContext<ServerCommandSource> context, String name, boolean forced) {
-        if (!context.getSource().isExecutedByPlayer()) {
-            context.getSource().sendFeedback(() -> Text.of("This command can only be executed by players!"), false);
-            return 1;
-        }
-        var player = context.getSource().getPlayer();
+    private static int execute(CommandContext<ServerCommandSource> context, String name, boolean forced) throws CommandSyntaxException {
+        var player = context.getSource().getPlayerOrThrow();
         var playerState = RccServer.state.getPlayerState(player.getUuid());
         var homes = playerState.homes;
         var playerContext = PlaceholderContext.of(player);

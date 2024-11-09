@@ -6,6 +6,7 @@ import cc.reconnected.server.util.Components;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
@@ -34,15 +35,11 @@ public class TeleportAskCommand {
         dispatcher.register(literal("tpask").redirect(node));
     }
 
-    private static void execute(CommandContext<ServerCommandSource> context) {
+    private static void execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         var source = context.getSource();
-        if (!source.isExecutedByPlayer()) {
-            source.sendFeedback(() -> Text.of("This command can only be executed by players!"), false);
-            return;
-        }
+        var player = context.getSource().getPlayerOrThrow();
 
         var server = source.getServer();
-        var player = source.getPlayer();
         var targetName = StringArgumentType.getString(context, "player");
         var playerManager = server.getPlayerManager();
         var target = playerManager.getPlayer(targetName);

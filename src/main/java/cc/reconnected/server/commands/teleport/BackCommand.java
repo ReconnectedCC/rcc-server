@@ -16,12 +16,7 @@ public class BackCommand {
         var rootCommand = literal("back")
                 .requires(Permissions.require("rcc.command.back", true))
                 .executes(context -> {
-                    if (!context.getSource().isExecutedByPlayer()) {
-                        context.getSource().sendFeedback(() -> Text.of("This command can only be executed by players!"), false);
-                        return 1;
-                    }
-
-                    var player = context.getSource().getPlayer();
+                    var player = context.getSource().getPlayerOrThrow();
                     var playerContext = PlaceholderContext.of(player);
 
                     var lastPosition = BackTracker.lastPlayerPositions.get(player.getUuid());

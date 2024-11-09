@@ -46,12 +46,7 @@ public class TeleportDenyCommand {
                 })
                 .then(argument("uuid", UuidArgumentType.uuid())
                         .executes(context -> {
-                            if (!context.getSource().isExecutedByPlayer()) {
-                                context.getSource().sendFeedback(() -> Text.of("This command can only be executed by players!"), false);
-                                return 1;
-                            }
-
-                            var player = context.getSource().getPlayer();
+                            var player = context.getSource().getPlayerOrThrow();
                             var uuid = UuidArgumentType.getUuid(context, "uuid");
                             var playerUuid = player.getUuid();
                             var playerRequests = TeleportTracker.teleportRequests.get(playerUuid);

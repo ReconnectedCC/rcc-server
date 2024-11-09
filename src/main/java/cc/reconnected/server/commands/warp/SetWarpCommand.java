@@ -5,6 +5,7 @@ import cc.reconnected.server.struct.ServerPosition;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
@@ -24,12 +25,8 @@ public class SetWarpCommand {
         dispatcher.register(rootCommand);
     }
 
-    private static int execute(CommandContext<ServerCommandSource> context, String name) {
-        if (!context.getSource().isExecutedByPlayer()) {
-            context.getSource().sendFeedback(() -> Text.of("This command can only be executed by players!"), false);
-            return 1;
-        }
-        var player = context.getSource().getPlayer();
+    private static int execute(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+        var player = context.getSource().getPlayerOrThrow();
         var serverState = RccServer.state.getServerState();
 
         var warps = serverState.warps;

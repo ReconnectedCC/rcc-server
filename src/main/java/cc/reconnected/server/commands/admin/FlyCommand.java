@@ -18,11 +18,7 @@ public class FlyCommand {
         var rootCommand = literal("fly")
                 .requires(Permissions.require("rcc.command.fly", 3))
                 .executes(context -> {
-                    if (!context.getSource().isExecutedByPlayer()) {
-                        context.getSource().sendFeedback(() -> Text.of("This command can only be executed by players!"), false);
-                        return 1;
-                    }
-                    var player = context.getSource().getPlayer();
+                    var player = context.getSource().getPlayerOrThrow();
                     context.getSource().sendFeedback(() -> toggleFlight(player), true);
 
                     return 1;

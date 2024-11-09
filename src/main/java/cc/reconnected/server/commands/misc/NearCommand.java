@@ -22,21 +22,9 @@ public class NearCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         var rootCommand = literal("near")
                 .requires(Permissions.require("rcc.command.near", 2))
-                .executes(context -> {
-                    if (!context.getSource().isExecutedByPlayer()) {
-                        context.getSource().sendFeedback(() -> Text.of("This command can only be executed by players!"), false);
-                        return 1;
-                    }
-                    return execute(context, RccServer.CONFIG.nearCommand.nearCommandDefaultRange, context.getSource().getPlayer());
-                })
+                .executes(context -> execute(context, RccServer.CONFIG.nearCommand.nearCommandDefaultRange, context.getSource().getPlayerOrThrow()))
                 .then(argument("radius", IntegerArgumentType.integer(0, RccServer.CONFIG.nearCommand.nearCommandMaxRange))
-                        .executes(context -> {
-                            if (!context.getSource().isExecutedByPlayer()) {
-                                context.getSource().sendFeedback(() -> Text.of("This command can only be executed by players!"), false);
-                                return 1;
-                            }
-                            return execute(context, IntegerArgumentType.getInteger(context, "radius"), context.getSource().getPlayer());
-                        }));
+                        .executes(context -> execute(context, IntegerArgumentType.getInteger(context, "radius"), context.getSource().getPlayerOrThrow())));
 
         dispatcher.register(rootCommand);
     }

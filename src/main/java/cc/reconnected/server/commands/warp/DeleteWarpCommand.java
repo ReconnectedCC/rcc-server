@@ -31,11 +31,6 @@ public class DeleteWarpCommand {
     }
 
     private static int execute(CommandContext<ServerCommandSource> context, String name) {
-        if (!context.getSource().isExecutedByPlayer()) {
-            context.getSource().sendFeedback(() -> Text.of("This command can only be executed by players!"), false);
-            return 1;
-        }
-        var player = context.getSource().getPlayer();
         var serverState = RccServer.state.getServerState();
         var warps = serverState.warps;
 
