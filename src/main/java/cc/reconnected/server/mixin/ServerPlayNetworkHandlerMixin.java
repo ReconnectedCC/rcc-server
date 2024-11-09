@@ -19,7 +19,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 @Mixin(ServerPlayNetworkHandler.class)
-public abstract class ServerPlayNetworkManagerMixin {
+public abstract class ServerPlayNetworkHandlerMixin {
     @Shadow
     @Final
     private MinecraftServer server;

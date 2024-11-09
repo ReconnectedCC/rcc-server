@@ -12,7 +12,7 @@
     "RegistryLoaderMixin",
     "SentMessageMixin",
     "ServerPlayerEntityMixin",
-    "ServerPlayNetworkManagerMixin",
+    "ServerPlayNetworkHandlerMixin",
     "PlayerManagerMixin"
 
   ],
