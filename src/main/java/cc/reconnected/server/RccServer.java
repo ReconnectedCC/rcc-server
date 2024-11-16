@@ -45,6 +45,7 @@ import net.minecraft.util.WorldSavePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Date;
 
 
@@ -52,7 +53,7 @@ public class RccServer implements ModInitializer {
     public static final String MOD_ID = "rcc-server";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    public static Config CONFIG = ConfigManager.load();
+    public static Config CONFIG;
 
     public static final StateManager state = new StateManager();
 
@@ -60,10 +61,6 @@ public class RccServer implements ModInitializer {
 
     public static RccServer getInstance() {
         return INSTANCE;
-    }
-
-    public RccServer() {
-        INSTANCE = this;
     }
 
     private LuckPerms luckPerms;
@@ -87,9 +84,20 @@ public class RccServer implements ModInitializer {
     public static final RegistryKey<MessageType> CHAT_TYPE = RegistryKey.of(RegistryKeys.MESSAGE_TYPE, new Identifier(MOD_ID, "chat"));
     private static boolean warnedAboutUnsignedMessages = false;
 
+    public RccServer() {
+        INSTANCE = this;
+    }
+
     @Override
     public void onInitialize() {
         LOGGER.info("Starting rcc-server");
+
+        try {
+            CONFIG = ConfigManager.load();
+        } catch (Exception e) {
+            LOGGER.error("Failed to load config. Refusing to continue.", e);
+            return;
+        }
 
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
             RccServer.server = server;

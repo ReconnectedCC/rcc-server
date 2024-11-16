@@ -8,6 +8,8 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
+import java.io.IOException;
+
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class RccCommand {
