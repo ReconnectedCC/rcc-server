@@ -66,7 +66,7 @@ public class SetHomeCommand {
         }
 
         var maxHomes = RccServer.CONFIG.homes.maxHomes;
-        if(homes.size() >= maxHomes && !exists) {
+        if(maxHomes >= 0 && homes.size() >= maxHomes && !exists) {
             context.getSource().sendFeedback(() -> Components.parse(
                     RccServer.CONFIG.textFormats.commands.home.maxHomesReached,
                     playerContext,
